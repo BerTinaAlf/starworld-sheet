@@ -6,7 +6,7 @@
   "url": "https://github.com/BerTinaAlf/starworld-sheet",
   "manifest": "https://raw.githubusercontent.com/BerTinaAlf/starworld-sheet/main/module.json",
   "download": "https://github.com/BerTinaAlf/starworld-sheet/archive/refs/heads/main.zip",
-  "compatibility": { "minimum": "14", "verified": "14" },
+  "compatibility": { "minimum": "13", "verified": "14" },
   "authors": [{ "name": "StarWorld Studio" }],
   "esmodules": ["scripts/index.mjs"],
   "styles": ["styles/sheet.css"],
