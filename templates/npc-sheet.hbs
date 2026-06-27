@@ -1,0 +1,85 @@
+<div class="sw-sheet sw-npc">
+
+  <header class="sw-header">
+    <img class="sw-avatar" src="{{actor.img}}" alt="" data-edit="img">
+    <div class="sw-identity">
+      <input class="sw-name" name="name" type="text" value="{{actor.name}}"
+             {{#unless isEditable}}disabled{{/unless}}>
+      <div class="sw-subtitle">{{type}} · {{size}} · {{alignment}}</div>
+    </div>
+    <div class="sw-quickstats">
+      <div class="sw-qs-hp">
+        <div class="sw-qs-hp-row">
+          <input type="number" class="sw-hp-input" name="system.attributes.hp.value"
+                 value="{{hp.value}}" min="0" {{#unless isEditable}}disabled{{/unless}}>
+          <span class="sw-hp-sep">/</span>
+          <span class="sw-hp-max">{{hp.max}}</span>
+        </div>
+        <div class="sw-hp-bar"><div class="sw-hp-fill" style="width:{{#if hp.max}}{{percent hp.value hp.max}}%{{else}}0%{{/if}}"></div></div>
+        <span class="sw-qs-lbl">生命值</span>
+      </div>
+      <div class="sw-qs-stat"><span class="sw-qs-val">{{ac}}</span><span class="sw-qs-lbl">AC</span></div>
+      <div class="sw-qs-stat"><span class="sw-qs-val">{{speed}}尺</span><span class="sw-qs-lbl">速度</span></div>
+      <div class="sw-qs-stat"><span class="sw-qs-val">{{crLabel}}</span><span class="sw-qs-lbl">挑战等级</span></div>
+      <div class="sw-qs-stat"><span class="sw-qs-val">{{xp}}</span><span class="sw-qs-lbl">经验值</span></div>
+    </div>
+  </header>
+
+  <div class="sw-body sw-npc-body">
+
+    {{!-- 六维属性横排 --}}
+    <div class="sw-npc-abilities">
+      {{#each abilities as |abl|}}
+      <button type="button" class="sw-npc-abl" data-action="rollAbility" data-ability="{{abl.key}}">
+        <span class="sw-npc-abl-lbl">{{abl.label}}</span>
+        <span class="sw-npc-abl-score">{{abl.value}}</span>
+        <span class="sw-npc-abl-mod">{{abl.mod}}</span>
+      </button>
+      {{/each}}
+    </div>
+
+    {{!-- 技能熟练 --}}
+    {{#if skills}}
+    <div class="sw-npc-section">
+      <span class="sw-npc-lbl">技能熟练</span>
+      <span class="sw-npc-val">
+        {{#each skills as |s|}}{{s.label}} {{s.total}}{{#unless @last}}，{{/unless}}{{/each}}
+      </span>
+    </div>
+    {{/if}}
+
+    {{!-- 感知 --}}
+    <div class="sw-npc-section">
+      <span class="sw-npc-lbl">被动察觉</span>
+      <span class="sw-npc-val">{{passivePerception}}</span>
+    </div>
+
+    {{!-- 动作 --}}
+    {{#if actions}}
+    <div class="sw-npc-group-hd">⚔ 动作</div>
+    {{#each actions as |item|}}
+    <div class="sw-item-row" data-item-id="{{item.id}}">
+      <img class="sw-item-img" src="{{item.img}}" alt="">
+      <span class="sw-item-name">{{item.name}}</span>
+      <span class="sw-item-tag">{{item.system.damage.parts.[0].[0]}}</span>
+      <button type="button" class="sw-btn-sm gold" data-action="itemAction" data-action-type="use">使用</button>
+      <button type="button" class="sw-btn-sm" data-action="itemAction" data-action-type="edit">✎</button>
+    </div>
+    {{/each}}
+    {{/if}}
+
+    {{!-- 法术 --}}
+    {{#if spells}}
+    <div class="sw-npc-group-hd">✨ 法术</div>
+    {{#each spells as |item|}}
+    <div class="sw-item-row" data-item-id="{{item.id}}">
+      <span class="sw-spell-lv">{{item.system.level}}</span>
+      <img class="sw-item-img" src="{{item.img}}" alt="">
+      <span class="sw-item-name">{{item.name}}</span>
+      <button type="button" class="sw-btn-sm gold" data-action="itemAction" data-action-type="use">施放</button>
+    </div>
+    {{/each}}
+    {{/if}}
+
+  </div>
+</div>

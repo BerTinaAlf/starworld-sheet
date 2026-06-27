@@ -1,0 +1,655 @@
+<div class="sw-sheet{{#if isDying}} sw-dying{{/if}}">
+
+  {{!-- ── Header ── --}}
+  <header class="sw-header">
+    {{!-- V2: 升级头像框 --}}
+  <div class="sw-avatar-wrap">
+    <img class="sw-avatar" src="{{actor.img}}" alt="" data-edit="img">
+    <svg class="sw-avatar-ring" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="32,2 60,18 60,46 32,62 4,46 4,18" fill="none" stroke="var(--sw-gold)" stroke-width="1.5" opacity="0.7"/>
+      <polygon points="32,6 56,20 56,44 32,58 8,44 8,20" fill="none" stroke="var(--sw-gold)" stroke-width="0.5" opacity="0.4"/>
+    </svg>
+  </div>
+    <div class="sw-identity">
+      <input class="sw-name" name="name" type="text" value="{{actor.name}}"
+             {{#unless canEdit}}disabled{{/unless}}>
+      <div class="sw-subtitle">Lv.{{level}}
+        {{#if raceLabel}}· {{raceLabel}}{{/if}}
+        {{#if classLabel}}· {{classLabel}}{{/if}}
+      </div>
+      {{#if xpData.max}}
+      <div class="sw-xp-wrap">
+        <div class="sw-xp-bar" title="经验值 {{xpData.value}}/{{xpData.max}}">
+          <div class="sw-xp-fill" style="width:{{xpPct}}%"></div>
+        </div>
+        <span class="sw-xp-lbl">{{xpData.value}}/{{xpData.max}} XP</span>
+      </div>
+      {{/if}}
+    </div>
+
+    <div class="sw-quickstats">
+      <div class="sw-qs-hp">
+        <div class="sw-qs-hp-row">
+          <input type="number" class="sw-hp-input" name="system.attributes.hp.value"
+                 value="{{hp.value}}" min="0" max="{{hp.max}}"
+                 {{#unless isEditable}}disabled{{/unless}}>
+          <span class="sw-hp-sep">/</span>
+          {{#if canEdit}}
+          <input type="number" class="sw-hp-input sw-hp-max-input" name="system.attributes.hp.max"
+                 value="{{hp.max}}" min="0">
+          {{else}}
+          <span class="sw-hp-max">{{hp.max}}</span>
+          {{/if}}
+        </div>
+        <div class="sw-qs-hp-row sw-temp-row">
+          <input type="number" class="sw-hp-input sw-temp-input" name="system.attributes.hp.temp"
+                 value="{{tempHp}}" min="0" placeholder="临时"
+                 {{#unless isEditable}}disabled{{/unless}}>
+          <span class="sw-temp-lbl">临时HP</span>
+        </div>
+        <div class="sw-hp-bar">
+          <div class="sw-hp-fill" style="width:{{#if hp.max}}{{percent hp.value hp.max}}%{{else}}0%{{/if}}"></div>
+        </div>
+        <span class="sw-qs-lbl">生命值</span>
+        {{#if isDying}}
+        <div class="sw-death">
+          <div class="sw-death-row">
+            <span class="sw-death-lbl success">✓</span>
+            {{#each deathSuccesses as |v|}}<span class="sw-death-pip{{#if v}} on{{/if}}"></span>{{/each}}
+          </div>
+          <div class="sw-death-row">
+            <span class="sw-death-lbl failure">✗</span>
+            {{#each deathFailures as |v|}}<span class="sw-death-pip fail{{#if v}} on{{/if}}"></span>{{/each}}
+          </div>
+          <button type="button" class="sw-death-roll" data-action="rollDeath">骰死亡豁免</button>
+        </div>
+        {{/if}}
+      </div>
+      <div class="sw-qs-stat"><span class="sw-qs-val">{{ac}}</span><span class="sw-qs-lbl">AC</span></div>
+      <div class="sw-qs-stat">
+        <span class="sw-qs-val">{{#if (gte initiative 0)}}+{{/if}}{{initiative}}</span>
+        <span class="sw-qs-lbl">先攻</span>
+      </div>
+      {{!-- 速度（支持多类型） --}}
+      {{#each speeds as |sp|}}
+      <div class="sw-qs-stat"><span class="sw-qs-val">{{sp.value}}</span><span class="sw-qs-lbl">{{sp.label}}</span></div>
+      {{/each}}
+      <div class="sw-qs-stat"><span class="sw-qs-val">+{{proficiencyBonus}}</span><span class="sw-qs-lbl">熟练</span></div>
+      {{!-- 衰竭 --}}
+      {{#if exhaustion}}
+      <div class="sw-qs-stat sw-exhaustion"><span class="sw-qs-val">{{exhaustion}}</span><span class="sw-qs-lbl">衰竭</span></div>
+      {{/if}}
+    </div>
+
+    {{#if isEditable}}
+    <button type="button" class="sw-edit-toggle{{#if editMode}} active{{/if}}" data-action="toggleEdit"
+            title="{{#if editMode}}退出编辑{{else}}进入编辑{{/if}}">
+      {{#if editMode}}🔒 锁定{{else}}✏️ 编辑{{/if}}
+    </button>
+    {{!-- 主题预设（折叠式） --}}
+    <details class="sw-theme-dropdown">
+      <summary class="sw-theme-toggle" title="切换主题">🎨</summary>
+      <div class="sw-theme-menu">
+        <button type="button" class="sw-theme-btn"        data-action="setTheme" data-theme="">金色</button>
+        <button type="button" class="sw-theme-btn arcane" data-action="setTheme" data-theme="arcane">秘法</button>
+        <button type="button" class="sw-theme-btn blood"  data-action="setTheme" data-theme="blood">血色</button>
+        <button type="button" class="sw-theme-btn nature" data-action="setTheme" data-theme="nature">自然</button>
+      </div>
+    </details>
+    {{/if}}
+  </header>
+
+  {{!-- 短休/长休 + 生命骰 + 灵感 --}}
+  {{#if isEditable}}
+  <div class="sw-rest-bar">
+    <button type="button" class="sw-rest-btn" data-action="shortRest">☕ 短休</button>
+    <button type="button" class="sw-rest-btn" data-action="longRest">🌙 长休</button>
+    {{#each hitDice as |hd|}}
+    <button type="button" class="sw-hd-btn{{#unless hd.available}} depleted{{/unless}}"
+            data-action="useHitDie" data-class-id="{{hd.id}}"
+            title="投生命骰 {{hd.denomination}}（剩余{{hd.available}}/{{hd.total}}）">
+      {{hd.denomination}} ×{{hd.available}}
+    </button>
+    {{/each}}
+    <button type="button" class="sw-insp-btn{{#if inspiration}} active{{/if}}"
+            data-action="toggleInspiration">
+      {{#if inspiration}}⭐ 英雄激励{{else}}☆ 英雄激励{{/if}}
+    </button>
+  </div>
+  {{/if}}
+
+  {{!-- ── Body ── --}}
+  <div class="sw-body">
+
+    {{!-- Left sidebar --}}
+    <aside class="sw-sidebar">
+      <div class="sw-sidebar-hd">属性值</div>
+      <div class="sw-abl-grid">
+      {{#each abilities as |abl|}}
+      <div class="sw-abl-cell">
+        {{#if @root.canEdit}}
+        <div class="sw-ddb-wrap edit">
+          <span class="sw-abl-lbl">{{abl.label}}</span>
+          <input type="number" class="sw-abl-score-input" name="system.abilities.{{abl.key}}.value"
+                 value="{{abl.value}}" min="1" max="30">
+          <span class="sw-abl-mod">{{abl.mod}}</span>
+        </div>
+        {{else}}
+        <button type="button" class="sw-ddb-wrap" data-action="rollAbility" data-ability="{{abl.key}}">
+          <span class="sw-abl-lbl">{{abl.label}}</span>
+          <span class="sw-abl-score">{{abl.value}}</span>
+          <span class="sw-abl-mod">{{abl.mod}}</span>
+        </button>
+        {{/if}}
+        <button type="button" class="sw-save-btn{{#if abl.saveProficient}} prof{{/if}}"
+                data-action="rollSave" data-ability="{{abl.key}}">
+          豁免 {{abl.save}}
+        </button>
+      </div>
+      {{/each}}
+      </div>
+
+      {{!-- 法术施法信息 --}}
+      {{#if spellAbility}}
+      <div class="sw-sidebar-hd" style="margin-top:10px">施法</div>
+      <div class="sw-spell-stats">
+        <div class="sw-ss-item"><span class="sw-ss-val">{{spellDC}}</span><span class="sw-ss-lbl">豁免DC</span></div>
+        {{#if spellAtkFmt}}<div class="sw-ss-item"><span class="sw-ss-val">{{spellAtkFmt}}</span><span class="sw-ss-lbl">法术攻击</span></div>{{/if}}
+        <div class="sw-ss-item"><span class="sw-ss-val" style="font-size:0.65rem;text-transform:uppercase">{{spellAbility}}</span><span class="sw-ss-lbl">施法属性</span></div>
+      </div>
+      {{/if}}
+    </aside>
+
+    {{!-- Right: tabs + content --}}
+    <div class="sw-main">
+      <nav class="sw-tabs">
+        {{#unless guideComplete}}
+        <button type="button" class="sw-tab{{#if (eq activeTab 'guide')}} active{{/if}}"
+                data-action="changeTab" data-tab="guide">🧭 车卡指南 {{guideDoneCount}}/{{guideTotalCount}}</button>
+        {{/unless}}
+        {{#each (array
+          (hash id="skills"    label="技能")
+          (hash id="inventory" label="物品")
+          (hash id="spells"    label="法术")
+          (hash id="features"  label="特性")
+          (hash id="biography" label="背景")
+        ) as |t|}}
+        <button type="button" class="sw-tab{{#if (eq ../activeTab t.id)}} active{{/if}}"
+                data-action="changeTab" data-tab="{{t.id}}">{{t.label}}</button>
+        {{/each}}
+      </nav>
+
+      <div class="sw-content">
+
+        {{!-- 车卡指南 --}}
+        {{#if (eq activeTab 'guide')}}
+        <div class="sw-guide">
+          <div class="sw-guide-title">✨ 欢迎来到星界旅者</div>
+          <p class="sw-guide-sub">完成以下步骤以完成角色创建：</p>
+          <div class="sw-guide-progress">
+            <div class="sw-guide-progress-bar" style="width:{{guidePct}}%"></div>
+          </div>
+          <span class="sw-guide-progress-lbl">{{guideDoneCount}} / {{guideTotalCount}} 已完成</span>
+          <ul class="sw-guide-checklist">
+            {{#each guideChecks as |c|}}
+            <li class="sw-check-item{{#if c.done}} done{{/if}}">
+              <span class="sw-check-icon">{{#if c.done}}✅{{else}}⭕{{/if}}</span>
+              <div class="sw-check-body">
+                <strong>{{c.label}}</strong>
+                {{#unless c.done}}
+                {{#if (eq c.id "name")}}
+                <input class="sw-guide-name-input" type="text" name="name" placeholder="输入角色名称…" value="{{@root.actor.name}}">
+                {{else}}
+                {{#if (eq c.id "class")}}
+                <details class="sw-picker sw-guide-picker">
+                  <summary class="sw-picker-summary"><span class="sw-picker-placeholder">点击选择职业…</span><span class="sw-picker-arrow">▾</span></summary>
+                  <ul class="sw-picker-list">
+                    {{#each @root.classOptions as |o|}}<li><button type="button" class="sw-picker-opt" data-action="selectClass" data-uuid="{{o.uuid}}"><img src="{{o.img}}"><span>{{o.name}}</span></button></li>
+                    {{else}}<li class="sw-picker-empty">请先载入合集包</li>{{/each}}
+                  </ul>
+                </details>
+                {{else}}
+                {{#if (eq c.id "race")}}
+                <details class="sw-picker sw-guide-picker">
+                  <summary class="sw-picker-summary"><span class="sw-picker-placeholder">点击选择种族…</span><span class="sw-picker-arrow">▾</span></summary>
+                  <ul class="sw-picker-list">
+                    {{#each @root.raceOptions as |o|}}<li><button type="button" class="sw-picker-opt" data-action="selectRace" data-uuid="{{o.uuid}}"><img src="{{o.img}}"><span>{{o.name}}</span></button></li>
+                    {{else}}<li class="sw-picker-empty">请先载入合集包</li>{{/each}}
+                  </ul>
+                </details>
+                {{else}}
+                {{#if (eq c.id "background")}}
+                <details class="sw-picker sw-guide-picker">
+                  <summary class="sw-picker-summary"><span class="sw-picker-placeholder">点击选择背景…</span><span class="sw-picker-arrow">▾</span></summary>
+                  <ul class="sw-picker-list">
+                    {{#each @root.backgroundOptions as |o|}}<li><button type="button" class="sw-picker-opt" data-action="selectBackground" data-uuid="{{o.uuid}}"><img src="{{o.img}}"><span>{{o.name}}</span></button></li>
+                    {{else}}<li class="sw-picker-empty">请先载入合集包</li>{{/each}}
+                  </ul>
+                </details>
+                {{else}}
+                <p class="sw-check-hint">{{c.hint}}</p>
+                {{/if}}{{/if}}{{/if}}{{/if}}
+                {{/unless}}
+              </div>
+            </li>
+            {{/each}}
+          </ul>
+          <div class="sw-guide-tip">💡 所有项完成后此指南自动隐藏。</div>
+          {{#if guideHasGrants}}
+          <div class="sw-guide-grants">
+            <div class="sw-guide-grants-hd">🎒 已获得</div>
+            {{#if guideGrants.currency.length}}
+            <div class="sw-gg-currency">
+              {{#each guideGrants.currency as |c|}}<span class="sw-gg-coin">{{c.value}} {{c.key}}</span>{{/each}}
+            </div>
+            {{/if}}
+            {{#if guideGrants.items.length}}
+            <div class="sw-gg-items">
+              {{#each guideGrants.items as |i|}}<span class="sw-gg-item" title="{{i.name}}"><img src="{{i.img}}"><span class="sw-gg-name">{{i.name}}</span>{{#if (gt i.qty 1)}}<span class="sw-gg-qty">×{{i.qty}}</span>{{/if}}</span>{{/each}}
+            </div>
+            {{/if}}
+          </div>
+          {{/if}}
+        </div>
+        {{/if}}
+
+        {{!-- 技能 --}}
+        {{#if (eq activeTab 'skills')}}
+        <div class="sw-skills-tab">
+          <div class="sw-skill-list">
+            {{#each skills as |s|}}
+            <div class="sw-skill-row">
+              {{#if @root.canEdit}}
+              <button type="button" class="sw-pip-btn prof-{{s.prof}}"
+                      data-action="cycleSkillProf" data-skill="{{s.key}}"
+                      title="点击切换熟练（○无/熟练/专精）">{{s.profLabel}}</button>
+              {{else}}
+              <span class="sw-pip{{#if s.prof}} on{{#if (gte s.prof 2)}} expert{{/if}}{{/if}}"></span>
+              {{/if}}
+              <button type="button" class="sw-skill-btn" data-action="rollSkill" data-skill="{{s.key}}">
+                {{s.label}}<span class="sw-skill-abl">({{s.ability}})</span>
+              </button>
+              <span class="sw-skill-mod">{{s.total}}</span>
+              <span class="sw-skill-passive" title="被动值">{{s.passive}}</span>
+            </div>
+            {{/each}}
+          </div>
+          {{!-- 熟练 & 抗性 --}}
+          <div class="sw-prof-block">
+            {{#if armorProf}}<div class="sw-prof-row"><span class="sw-prof-lbl">护甲熟练</span><span class="sw-prof-val">{{armorProf}}</span></div>{{/if}}
+            {{#if weaponProf}}<div class="sw-prof-row"><span class="sw-prof-lbl">武器熟练</span><span class="sw-prof-val">{{weaponProf}}</span></div>{{/if}}
+            {{#if toolProf}}<div class="sw-prof-row"><span class="sw-prof-lbl">工具熟练</span><span class="sw-prof-val">{{toolProf}}</span></div>{{/if}}
+            {{#if languages}}<div class="sw-prof-row"><span class="sw-prof-lbl">语言</span><span class="sw-prof-val">{{languages}}</span></div>{{/if}}
+            {{#if dmgResist}}<div class="sw-prof-row"><span class="sw-prof-lbl">伤害抗性</span><span class="sw-prof-val sw-resist">{{dmgResist}}</span></div>{{/if}}
+            {{#if dmgImmune}}<div class="sw-prof-row"><span class="sw-prof-lbl">伤害免疫</span><span class="sw-prof-val sw-immune">{{dmgImmune}}</span></div>{{/if}}
+            {{#if dmgVuln}}<div class="sw-prof-row"><span class="sw-prof-lbl">伤害易伤</span><span class="sw-prof-val sw-vuln">{{dmgVuln}}</span></div>{{/if}}
+            {{#if condImmune}}<div class="sw-prof-row"><span class="sw-prof-lbl">状态免疫</span><span class="sw-prof-val sw-immune">{{condImmune}}</span></div>{{/if}}
+          </div>
+        </div>
+        {{/if}}
+        {{!-- 状态切换面板（折叠，技能tab底部） --}}
+        {{#if (eq activeTab 'skills')}}
+        {{#if allConditions}}
+        <details class="sw-cond-panel">
+          <summary class="sw-cond-summary">⚡ 状态效果 {{#if conditions.length}}<span class="sw-cond-count">{{conditions.length}}</span>{{/if}}</summary>
+          <div class="sw-conditions">
+            {{#each allConditions as |c|}}
+            <button type="button" class="sw-cond-btn{{#if c.active}} active{{/if}}"
+                    data-action="toggleCondition" data-condition="{{c.id}}" title="{{c.label}}">
+              <img src="{{c.icon}}" alt="{{c.label}}">
+              <span class="sw-cond-lbl">{{c.label}}</span>
+            </button>
+            {{/each}}
+          </div>
+        </details>
+        {{/if}}
+        {{/if}}
+
+        {{!-- F3: 职业面板（升级 + 兼职 + 模组状态） --}}
+        <div class="sw-class-panel">
+          {{!-- 模组状态栏 --}}
+          <div class="sw-mod-bar">
+            <span class="sw-mod-dot{{#if modStatus.midi}} on{{/if}}" title="midi-qol{{#unless modStatus.midi}} 未启用{{/unless}}">M</span>
+            <span class="sw-mod-dot{{#if modStatus.aa}} on{{/if}}" title="Auto Animations{{#unless modStatus.aa}} 未启用{{/unless}}">AA</span>
+            <span class="sw-mod-dot{{#if modStatus.cpr}} on{{/if}}" title="Chris's Premades{{#unless modStatus.cpr}} 未启用{{/unless}}">CPR</span>
+            <span class="sw-mod-dot{{#if modStatus.seq}} on{{/if}}" title="Sequencer{{#unless modStatus.seq}} 未启用{{/unless}}">SEQ</span>
+          </div>
+          {{!-- 职业列表 --}}
+          {{#each classes as |c|}}
+          <div class="sw-cls-row">
+            <img class="sw-cls-img" src="{{c.img}}" alt="">
+            <span class="sw-cls-name">{{c.name}}</span>
+            <span class="sw-cls-lv">Lv.{{c.system.levels}}</span>
+            {{#if @root.canEdit}}
+            <button type="button" class="sw-cls-lvup" data-action="levelUpClass" data-class-id="{{c.id}}" title="升级">▲</button>
+            {{/if}}
+          </div>
+          {{else}}
+          <div class="sw-cls-empty">尚未选择职业</div>
+          {{/each}}
+          {{!-- 兼职按钮 --}}
+          {{#if isEditable}}
+          <details class="sw-multiclass-picker">
+            <summary class="sw-multiclass-summary">＋ 添加兼职 <span class="sw-picker-arrow">▾</span></summary>
+            <ul class="sw-picker-list sw-multiclass-list">
+              {{#each classOptions as |o|}}
+              <li><button type="button" class="sw-picker-opt" data-action="addMulticlass" data-uuid="{{o.uuid}}">
+                <img src="{{o.img}}"><span>{{o.name}}</span>
+              </button></li>
+              {{else}}<li class="sw-picker-empty">请先载入合集包</li>{{/each}}
+            </ul>
+          </details>
+          {{/if}}
+        </div>
+
+        {{#if (gt classes.length 1)}}
+        <div class="sw-multiclass">
+          {{#each classes as |c|}}
+          <span class="sw-mc-chip"><img src="{{c.img}}" alt="">{{c.name}} {{c.system.levels}}</span>
+          {{/each}}
+        </div>
+        {{/if}}
+
+        {{!-- 物品 (分类列表 + 格子视图) --}}
+        {{#if (eq activeTab 'inventory')}}
+        {{#if encumbrance}}
+        <div class="sw-encumbrance{{#if encumbrance.heavy}} heavy{{/if}}">
+          <span class="sw-enc-lbl">负重 {{encumbrance.value}}/{{encumbrance.max}} lb</span>
+          <div class="sw-enc-bar"><div class="sw-enc-fill" style="width:{{encumbrance.pct}}%"></div></div>
+        </div>
+        {{/if}}
+        {{!-- 分类列表 --}}
+        {{#each invGroups as |grp|}}
+        <div class="sw-inv-section-hd">{{grp.label}}</div>
+        {{#each grp.items as |g|}}
+        <div class="sw-item-row{{#if g.equipped}} equipped{{/if}}" data-item-id="{{g.id}}">
+          <img class="sw-item-img" src="{{g.img}}" alt="">
+          <span class="sw-item-name">{{g.name}}</span>
+          {{#if (gt g.system.quantity 1)}}<span class="sw-item-qty">×{{g.system.quantity}}</span>{{/if}}
+          {{#with (lookup @root.itemUsesMap g.id) as |u|}}<span class="sw-uses-badge{{#unless u.value}} depleted{{/unless}}">{{u.value}}/{{u.max}}</span>{{/with}}
+          {{#if (ne g.type "backpack")}}
+          <button type="button" class="sw-btn-sm{{#if g.equipped}} on{{/if}}" data-action="toggleEquipped" title="{{#if g.equipped}}取消装备{{else}}装备{{/if}}">⚙</button>
+          {{/if}}
+          <button type="button" class="sw-btn-sm" data-action="itemAction" data-action-type="use" title="使用">▶</button>
+          <button type="button" class="sw-btn-sm" data-action="itemAction" data-action-type="edit" title="编辑">✎</button>
+          {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete" title="删除">✕</button>{{/if}}
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="sw-empty-hint">📦 暂无物品</div>
+        {{/each}}
+        {{!-- 货币栏（紧凑单行） --}}
+        <div class="sw-currency">
+          <div class="sw-coin gp" title="金币">
+            <input type="number" name="system.currency.gp" value="{{currency.gp}}" min="0" {{#unless isEditable}}disabled{{/unless}}>
+            <span class="sw-coin-lbl">金币（GP）</span>
+          </div>
+          <div class="sw-coin sp" title="银币">
+            <input type="number" name="system.currency.sp" value="{{currency.sp}}" min="0" {{#unless isEditable}}disabled{{/unless}}>
+            <span class="sw-coin-lbl">银币（SP）</span>
+          </div>
+          <div class="sw-coin cp" title="铜币">
+            <input type="number" name="system.currency.cp" value="{{currency.cp}}" min="0" {{#unless isEditable}}disabled{{/unless}}>
+            <span class="sw-coin-lbl">铜币（CP）</span>
+          </div>
+          <div class="sw-coin pp" title="白金币">
+            <input type="number" name="system.currency.pp" value="{{currency.pp}}" min="0" {{#unless isEditable}}disabled{{/unless}}>
+            <span class="sw-coin-lbl">白金（PP）</span>
+          </div>
+          <div class="sw-coin ep" title="银元">
+            <input type="number" name="system.currency.ep" value="{{currency.ep}}" min="0" {{#unless isEditable}}disabled{{/unless}}>
+            <span class="sw-coin-lbl">银元（EP）</span>
+          </div>
+        </div>
+        {{/if}}
+
+        {{!-- 法术 --}}
+        {{#if (eq activeTab 'spells')}}
+        {{!-- 法术选择器（有职业+可编辑时显示） --}}
+        {{#if isEditable}}{{#if hasSpellcasting}}
+        <details class="sw-spell-picker">
+          <summary class="sw-spell-picker-summary">✨ 添加法术 <span class="sw-picker-arrow">▾</span></summary>
+          <div class="sw-spell-picker-body">
+            {{#if spellOptions}}
+            <div class="sw-spell-grid">
+              {{#each spellOptions as |sp|}}
+              <button type="button"
+                class="sw-spell-add-btn{{#if (lookup ../knownSpellNames sp.name)}} known{{/if}}"
+                data-action="addSpell" data-uuid="{{sp.uuid}}"
+                title="{{sp.name}}（{{#if (eq sp.level 0)}}戏法{{else}}{{sp.level}}环{{/if}}）{{#if (lookup ../knownSpellNames sp.name)}} · 已习得{{/if}}"
+                {{#if (lookup ../knownSpellNames sp.name)}}disabled{{/if}}>
+                <img src="{{sp.img}}" alt="">
+                <span class="sw-spell-add-lv">{{#if (eq sp.level 0)}}戏{{else}}{{sp.level}}{{/if}}</span>
+                <span class="sw-spell-add-name">{{sp.name}}</span>
+                {{#if (lookup ../knownSpellNames sp.name)}}<span class="sw-spell-known-mark">✓</span>{{/if}}
+              </button>
+              {{/each}}
+            </div>
+            {{else}}
+            <div class="sw-picker-empty">未找到法术（请先载入合集包，或当前职业无施法能力）</div>
+            {{/if}}
+          </div>
+        </details>
+        {{/if}}{{/if}}
+        {{!-- 法术施法信息栏 --}}
+        {{#if spellAbility}}
+        <div class="sw-spell-stats">
+          <div class="sw-ss-item"><span class="sw-ss-val">{{spellDC}}</span><span class="sw-ss-lbl">豁免DC</span></div>
+          {{#if spellAtkFmt}}<div class="sw-ss-item"><span class="sw-ss-val">{{spellAtkFmt}}</span><span class="sw-ss-lbl">法术攻击</span></div>{{/if}}
+          <div class="sw-ss-item"><span class="sw-ss-val" style="font-size:0.65rem;text-transform:uppercase">{{spellAbility}}</span><span class="sw-ss-lbl">施法属性</span></div>
+        </div>
+        {{/if}}
+        {{!-- 法术环位 + 契约法术位 --}}
+        {{#if spellSlots}}
+        <div class="sw-slot-row">
+          {{#each spellSlots as |s|}}
+          <div class="sw-slot-chip">
+            <span class="sw-slot-lv">{{s.level}}</span>
+            <div class="sw-slot-pips">
+              {{#each (array 1 2 3 4 5 6 7 8 9) as |i|}}{{#if (gte ../s.max i)}}
+              <span class="sw-slot-pip{{#if (gte ../s.value i)}} on{{/if}}"
+                    data-action="{{#if (gte ../s.value i)}}spendSlot{{else}}recoverSlot{{/if}}"
+                    data-level="{{../s.level}}"
+                    title="{{#if (gte ../s.value i)}}消耗{{else}}恢复{{/if}}{{../s.level}}环法术位"></span>
+              {{/if}}{{/each}}
+            </div>
+          </div>
+          {{/each}}
+          {{#if pactSlot}}
+          <div class="sw-slot-chip sw-pact-chip">
+            <span class="sw-slot-lv">契</span>
+            <div class="sw-slot-pips">
+              {{#each (array 1 2 3 4 5) as |i|}}{{#if (gte ../pactSlot.max i)}}
+              <span class="sw-slot-pip{{#if (gte ../pactSlot.value i)}} on{{/if}}"
+                    data-action="{{#if (gte ../pactSlot.value i)}}spendSlot{{else}}recoverSlot{{/if}}"
+                    data-level="pact"
+                    title="{{#if (gte ../pactSlot.value i)}}消耗{{else}}恢复{{/if}}契约法术位（{{../pactSlot.level}}环）"></span>
+              {{/if}}{{/each}}
+            </div>
+          </div>
+          {{/if}}
+        </div>
+        {{/if}}
+        {{!-- 法术准备计数 --}}
+        {{#unless alwaysPrepared}}{{#if maxPrepared}}
+        <div class="sw-prepared-hd">已准备 {{preparedCount}}/{{maxPrepared}}</div>
+        {{/if}}{{/unless}}
+        {{!-- F1: 法术按环位分组 --}}
+        {{#each spellsByLevel as |grp|}}
+        <div class="sw-spell-level-hd">
+          <span class="sw-spell-level-badge">{{grp.label}}</span>
+          <span class="sw-spell-level-count">×{{grp.spells.length}}</span>
+        </div>
+        {{#each grp.spells as |item|}}
+        <div class="sw-item-row{{#if item.system.concentration}} concentrating{{/if}}"
+             data-item-id="{{item.id}}"
+             data-prep="{{#if item.system.preparation.prepared}}prepared{{else}}{{item.system.preparation.mode}}{{/if}}">
+          {{!-- 法术准备切换（非戏法） --}}
+          {{#if (gt item.system.level 0)}}
+          {{#unless @root.alwaysPrepared}}
+          <button type="button" class="sw-prep-btn{{#if item.system.preparation.prepared}} on{{/if}}"
+                  data-action="toggleSpellPrepared"
+                  title="{{#if item.system.preparation.prepared}}已准备（点击取消）{{else}}未准备（点击准备）{{/if}}">
+            {{#if item.system.preparation.prepared}}🔵{{else}}⚪{{/if}}
+          </button>
+          {{/unless}}
+          {{else}}
+          <span class="sw-prep-spacer"></span>
+          {{/if}}
+          <img class="sw-item-img" src="{{item.img}}" alt="">
+          <span class="sw-item-name">{{item.name}}</span>
+          {{#if item.system.concentration}}<span class="sw-conc-badge">专</span>{{/if}}
+          {{#if item.system.ritual}}<span class="sw-ritual-badge">仪</span>{{/if}}
+          <button type="button" class="sw-btn-sm gold" data-action="itemAction" data-action-type="use">施放</button>
+          <button type="button" class="sw-btn-sm" data-action="itemAction" data-action-type="edit">✎</button>
+          {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete">✕</button>{{/if}}
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="sw-empty-hint">✨ 暂无法术</div>
+        {{/each}}
+        {{/if}}
+
+        {{!-- 特性 --}}
+        {{#if (eq activeTab 'features')}}
+        {{#each featureGroups as |grp|}}
+        <div class="sw-group-hd">{{grp.label}}</div>
+        {{#each grp.items as |item|}}
+        <div class="sw-item-row{{#if (lookup @root.expandedItems item.id)}} expanded{{/if}}" data-item-id="{{item.id}}">
+          <img class="sw-item-img" src="{{item.img}}" alt="">
+          <span class="sw-item-name">{{item.name}}</span>
+          {{#with (lookup @root.itemUsesMap item.id) as |u|}}
+          <span class="sw-uses-badge{{#unless u.value}} depleted{{/unless}}">{{u.value}}/{{u.max}}</span>
+          {{/with}}
+          <button type="button" class="sw-btn-sm" data-action="toggleDetail">▾</button>
+          <button type="button" class="sw-btn-sm" data-action="itemAction" data-action-type="edit">✎</button>
+          {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete">✕</button>{{/if}}
+          {{#if (lookup @root.expandedItems item.id)}}
+          <div class="sw-item-detail">
+            {{#if item.system.description.value}}<div class="sw-item-desc">{{{item.system.description.value}}}</div>{{/if}}
+          </div>
+          {{/if}}
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="sw-empty-hint">⚔️ 暂无特性，添加职业/种族/专长后自动显示</div>
+        {{/each}}
+        {{/if}}
+
+        {{!-- 背景 --}}
+        {{#if (eq activeTab 'biography')}}
+        <div class="sw-bio">
+          {{!-- 种族下拉 --}}
+          <div class="sw-bio-row">
+            <label>种族</label>
+            {{#if isEditable}}
+            <details class="sw-picker">
+              <summary class="sw-picker-summary">
+                {{#if (ne raceLabel "—")}}
+                <img class="sw-picker-img" src="{{raceItemImg}}">{{raceLabel}}
+                {{else}}<span class="sw-picker-placeholder">点击选择种族…</span>{{/if}}
+                <span class="sw-picker-arrow">▾</span>
+              </summary>
+              <ul class="sw-picker-list">
+                {{#each raceOptions as |o|}}
+                <li><button type="button" class="sw-picker-opt" data-action="selectRace" data-uuid="{{o.uuid}}">
+                  <img src="{{o.img}}"><span>{{o.name}}</span>
+                </button></li>
+                {{else}}<li class="sw-picker-empty">未找到种族物品（请先载入合集包）</li>{{/each}}
+              </ul>
+            </details>
+            {{else}}<span>{{raceLabel}}</span>{{/if}}
+          </div>
+          {{!-- 背景下拉 --}}
+          <div class="sw-bio-row">
+            <label>背景</label>
+            {{#if isEditable}}
+            <details class="sw-picker">
+              <summary class="sw-picker-summary">
+                {{#if (ne backgroundLabel "—")}}
+                <img class="sw-picker-img" src="{{backgroundItemImg}}">{{backgroundLabel}}
+                {{else}}<span class="sw-picker-placeholder">点击选择背景…</span>{{/if}}
+                <span class="sw-picker-arrow">▾</span>
+              </summary>
+              <ul class="sw-picker-list">
+                {{#each backgroundOptions as |o|}}
+                <li><button type="button" class="sw-picker-opt" data-action="selectBackground" data-uuid="{{o.uuid}}">
+                  <img src="{{o.img}}"><span>{{o.name}}</span>
+                </button></li>
+                {{else}}<li class="sw-picker-empty">未找到背景物品（请先载入合集包）</li>{{/each}}
+              </ul>
+            </details>
+            {{else}}<span>{{backgroundLabel}}</span>{{/if}}
+          </div>
+          <div class="sw-bio-row">
+            <label>阵营</label>
+            {{#if canEdit}}<input type="text" name="system.details.alignment" value="{{system.details.alignment}}">
+            {{else}}<span>{{system.details.alignment}}</span>{{/if}}
+          </div>
+          <div class="sw-bio-row">
+            <label>年龄</label>
+            {{#if canEdit}}<input type="text" name="system.details.age" value="{{system.details.age}}">
+            {{else}}<span>{{system.details.age}}</span>{{/if}}
+          </div>
+          <div class="sw-bio-row full">
+            <label>性格特征</label>
+            <textarea name="system.details.trait" {{#unless canEdit}}disabled{{/unless}}>{{system.details.trait}}</textarea>
+          </div>
+          <div class="sw-bio-row full">
+            <label>理想</label>
+            <textarea name="system.details.ideal" {{#unless canEdit}}disabled{{/unless}}>{{system.details.ideal}}</textarea>
+          </div>
+          <div class="sw-bio-row full">
+            <label>羁绊</label>
+            <textarea name="system.details.bond" {{#unless canEdit}}disabled{{/unless}}>{{system.details.bond}}</textarea>
+          </div>
+          <div class="sw-bio-row full">
+            <label>缺陷</label>
+            <textarea name="system.details.flaw" {{#unless canEdit}}disabled{{/unless}}>{{system.details.flaw}}</textarea>
+          </div>
+          <div class="sw-bio-row full">
+            <label>外貌</label>
+            <textarea name="system.details.appearance" {{#unless canEdit}}disabled{{/unless}}>{{system.details.appearance}}</textarea>
+          </div>
+          {{!-- 熟练项 & 语言（只读展示） --}}
+          {{#if languages}}
+          <div class="sw-bio-row full"><label>语言</label><span class="sw-trait-list">{{languages}}</span></div>
+          {{/if}}
+          {{#if armorProf}}
+          <div class="sw-bio-row full"><label>盔甲熟练</label><span class="sw-trait-list">{{armorProf}}</span></div>
+          {{/if}}
+          {{#if weaponProf}}
+          <div class="sw-bio-row full"><label>武器熟练</label><span class="sw-trait-list">{{weaponProf}}</span></div>
+          {{/if}}
+          {{#if toolProf}}
+          <div class="sw-bio-row full"><label>工具熟练</label><span class="sw-trait-list">{{toolProf}}</span></div>
+          {{/if}}
+        </div>
+        {{/if}}
+
+      </div>{{!-- sw-content --}}
+    </div>{{!-- sw-main --}}
+  </div>{{!-- sw-body --}}
+
+  {{!-- 底部快速武器栏 + A3 骰点历史抽屉触发 --}}
+  {{#if quickWeapons}}
+  <footer class="sw-quickbar">
+    {{#each quickWeapons as |w|}}
+    <div class="sw-qw" data-item-id="{{w.id}}" title="{{w.name}}&#10;{{w.dmg}}">
+      <img src="{{w.img}}" alt="">
+      <span class="sw-qw-name">{{w.name}}</span>
+      <span class="sw-qw-dmg">{{w.dmg}}</span>
+      <button type="button" class="sw-qw-roll" data-action="itemAction" data-action-type="use">🎲</button>
+    </div>
+    {{/each}}
+    <button type="button" class="sw-dice-history-btn" data-action="toggleDiceDrawer" title="骰点历史">🎰</button>
+  </footer>
+  {{/if}}
+
+  {{!-- A3: 骰点历史侧抽屉 --}}
+  <div class="sw-dice-drawer">
+    <div class="sw-dice-drawer-hd">🎲 骰点历史</div>
+    <ul class="sw-dice-drawer-list"></ul>
+  </div>
+
+</div>

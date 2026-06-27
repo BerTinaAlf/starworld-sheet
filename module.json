@@ -1,0 +1,20 @@
+{
+  "id": "starworld-sheet",
+  "title": "星界旅者角色卡",
+  "description": "为星界旅者工作室定制的高级角色卡界面，暗宇宙奢华风格",
+  "version": "0.9.0",
+  "url": "https://github.com/BerTinaAlf/starworld-sheet",
+  "manifest": "https://github.com/BerTinaAlf/starworld-sheet/releases/latest/download/module.json",
+  "download": "https://github.com/BerTinaAlf/starworld-sheet/releases/latest/download/starworld-sheet.zip",
+  "compatibility": { "minimum": "14", "verified": "14" },
+  "authors": [{ "name": "StarWorld Studio" }],
+  "esmodules": ["scripts/index.mjs"],
+  "styles": ["styles/sheet.css"],
+  "languages": [
+    { "lang": "zh-CN", "name": "中文（简体）", "path": "lang/zh.json" },
+    { "lang": "en",    "name": "English",      "path": "lang/en.json" }
+  ],
+  "relationships": {
+    "systems": [{ "id": "dnd5e", "type": "system", "compatibility": { "minimum": "5.0.0" } }]
+  }
+}
