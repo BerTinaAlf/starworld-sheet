@@ -673,15 +673,66 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
     const next = cur >= 2 ? 0 : cur + 1;
     await this.actor.update({ [`system.skills.${skill}.value`]: next });
   }
+  static #setEquippedUI(target, equipped) {
+    const row = target.closest("[data-item-id]");
+    row?.classList.toggle("equipped", equipped);
+    target.classList.toggle("on", equipped);
+    target.title = equipped ? "取消装备" : "装备";
+  }
   static async #onToggleEquipped(event, target) {
     const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
     if (!item) return;
-    await item.update({ "system.equipped": !item.system.equipped });
+    const next = !item.system.equipped;
+    const prev = !!item.system.equipped;
+    StarworldCharacterSheet.#setEquippedUI(target, next);
+    target.disabled = true;
+    try {
+      await item.update({ "system.equipped": next }, { render: false });
+    } catch (err) {
+      StarworldCharacterSheet.#setEquippedUI(target, prev);
+      ui.notifications?.error("装备状态保存失败");
+      throw err;
+    } finally {
+      target.disabled = false;
+    }
+  }
+  static #setSpellPreparedUI(target, prepared, item) {
+    const row = target.closest("[data-item-id]");
+    const mode = item?.system?.preparation?.mode ?? "";
+    const unpreparedPrep = mode && (mode !== "prepared") ? mode : "";
+    if (row) row.dataset.prep = prepared ? "prepared" : unpreparedPrep;
+
+    target.classList.toggle("on", prepared);
+    target.textContent = prepared ? "🔵" : "⚪";
+    target.title = prepared ? "已准备（点击取消）" : "未准备（点击准备）";
+  }
+  static #updatePreparedCount(delta) {
+    const counter = this.element.querySelector(".sw-prepared-hd[data-prepared-count]");
+    if (!counter) return;
+    const current = Number(counter.dataset.preparedCount ?? 0);
+    const next = Math.max(0, current + delta);
+    const max = counter.dataset.preparedMax ?? "?";
+    counter.dataset.preparedCount = String(next);
+    counter.textContent = `已准备 ${next}/${max}`;
   }
   static async #onToggleSpellPrepared(event, target) {
     const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
     if (!item || item.system?.level === 0) return;
-    await item.update({ "system.preparation.prepared": !item.system.preparation?.prepared });
+    const prev = !!item.system.preparation?.prepared;
+    const next = !prev;
+    StarworldCharacterSheet.#setSpellPreparedUI(target, next, item);
+    StarworldCharacterSheet.#updatePreparedCount.call(this, next ? 1 : -1);
+    target.disabled = true;
+    try {
+      await item.update({ "system.preparation.prepared": next }, { render: false });
+    } catch (err) {
+      StarworldCharacterSheet.#setSpellPreparedUI(target, prev, item);
+      StarworldCharacterSheet.#updatePreparedCount.call(this, prev ? 1 : -1);
+      ui.notifications?.error("法术准备状态保存失败");
+      throw err;
+    } finally {
+      target.disabled = false;
+    }
   }
   static async #onRollTool(event, target) {
     const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);

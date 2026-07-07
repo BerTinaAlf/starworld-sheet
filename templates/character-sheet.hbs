@@ -472,7 +472,7 @@
         {{/if}}
         {{!-- 法术准备计数 --}}
         {{#unless alwaysPrepared}}{{#if maxPrepared}}
-        <div class="sw-prepared-hd">已准备 {{preparedCount}}/{{maxPrepared}}</div>
+        <div class="sw-prepared-hd" data-prepared-count="{{preparedCount}}" data-prepared-max="{{maxPrepared}}">已准备 {{preparedCount}}/{{maxPrepared}}</div>
         {{/if}}{{/unless}}
         {{!-- F1: 法术按环位分组 --}}
         {{#each spellsByLevel as |grp|}}
@@ -483,7 +483,7 @@
         {{#each grp.spells as |item|}}
         <div class="sw-item-row{{#if item.system.concentration}} concentrating{{/if}}"
              data-item-id="{{item.id}}"
-             data-prep="{{#if item.system.preparation.prepared}}prepared{{else}}{{item.system.preparation.mode}}{{/if}}">
+             data-prep="{{#if item.system.preparation.prepared}}prepared{{else}}{{#if (ne item.system.preparation.mode 'prepared')}}{{item.system.preparation.mode}}{{/if}}{{/if}}">
           {{!-- 法术准备切换（非戏法） --}}
           {{#if (gt item.system.level 0)}}
           {{#unless @root.alwaysPrepared}}
