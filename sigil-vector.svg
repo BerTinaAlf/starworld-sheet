@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Geometric arcane sigil">
+  <defs>
+    <style>
+      .outer {
+        fill: none;
+        stroke: #eef3f5;
+        stroke-width: 10;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .frame {
+        fill: none;
+        stroke: #eef3f5;
+        stroke-width: 7;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .inner {
+        fill: none;
+        stroke: #eef3f5;
+        stroke-width: 5.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .fine {
+        fill: none;
+        stroke: #eef3f5;
+        stroke-width: 3.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+
+  <g opacity="0.96">
+    <circle class="outer" cx="256" cy="256" r="178"/>
+    <circle class="fine" cx="256" cy="256" r="158"/>
+
+    <path class="frame" d="M75 101 H437 L256 411 Z"/>
+    <path class="frame" d="M75 411 H437 L256 101 Z"/>
+    <path class="fine" d="M96 111 H416"/>
+    <path class="fine" d="M96 401 H416"/>
+
+    <path class="inner" d="M256 118 C214 164 192 207 192 256 C192 305 214 348 256 394 C298 348 320 305 320 256 C320 207 298 164 256 118 Z"/>
+    <path class="inner" d="M256 118 C167 178 128 256 256 394 C345 334 384 256 256 118 Z"/>
+    <path class="inner" d="M256 118 C345 178 384 256 256 394 C167 334 128 256 256 118 Z"/>
+
+    <path class="fine" d="M256 118 V394"/>
+    <path class="fine" d="M142 256 H370"/>
+    <path class="fine" d="M166 161 L346 351"/>
+    <path class="fine" d="M346 161 L166 351"/>
+
+    <circle class="inner" cx="256" cy="256" r="23"/>
+    <circle cx="256" cy="256" r="6.5" fill="#eef3f5"/>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rune vector emblem">
+  <g fill="none" stroke="#eef3f5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 74 L438 256 L256 438 L74 256 Z"/>
+
+    <ellipse cx="256" cy="256" rx="78" ry="178"/>
+    <ellipse cx="256" cy="256" rx="78" ry="178" transform="rotate(90 256 256)"/>
+    <ellipse cx="256" cy="256" rx="78" ry="178" transform="rotate(45 256 256)"/>
+    <ellipse cx="256" cy="256" rx="78" ry="178" transform="rotate(-45 256 256)"/>
+
+    <path d="M256 230 L282 256 L256 282 L230 256 Z"/>
+  </g>
+
+  <circle cx="256" cy="256" r="5" fill="#eef3f5"/>
+</svg>

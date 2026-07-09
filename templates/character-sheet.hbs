@@ -4,11 +4,8 @@
   <header class="sw-header">
     {{!-- V2: 升级头像框 --}}
   <div class="sw-avatar-wrap">
+    <div class="sw-avatar-rune" aria-hidden="true"></div>
     <img class="sw-avatar" src="{{actor.img}}" alt="" data-edit="img">
-    <svg class="sw-avatar-ring" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="32,2 60,18 60,46 32,62 4,46 4,18" fill="none" stroke="var(--sw-gold)" stroke-width="1.5" opacity="0.7"/>
-      <polygon points="32,6 56,20 56,44 32,58 8,44 8,20" fill="none" stroke="var(--sw-gold)" stroke-width="0.5" opacity="0.4"/>
-    </svg>
   </div>
     <div class="sw-identity">
       <input class="sw-name" name="name" type="text" value="{{actor.name}}"
@@ -480,6 +477,16 @@
           <span class="sw-spell-level-badge">{{grp.label}}</span>
           <span class="sw-spell-level-count">×{{grp.spells.length}}</span>
         </div>
+        <div class="sw-spell-frame">
+          <span class="sw-spell-frame-edge top" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge right" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge bottom" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge left" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner tl" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner tr" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner br" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner bl" aria-hidden="true"></span>
+          <div class="sw-spell-frame-body">
         {{#each grp.spells as |item|}}
         <div class="sw-item-row{{#if item.system.concentration}} concentrating{{/if}}"
              data-item-id="{{item.id}}"
@@ -505,6 +512,8 @@
           {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete">✕</button>{{/if}}
         </div>
         {{/each}}
+          </div>
+        </div>
         {{else}}
         <div class="sw-empty-hint">✨ 暂无法术</div>
         {{/each}}
@@ -648,7 +657,10 @@
 
   {{!-- A3: 骰点历史侧抽屉 --}}
   <div class="sw-dice-drawer">
-    <div class="sw-dice-drawer-hd">🎲 骰点历史</div>
+    <div class="sw-dice-drawer-hd">
+      <span>🎲 骰点历史</span>
+      <button type="button" class="sw-dice-drawer-close" data-action="closeDiceDrawer" title="关闭骰点历史">✕</button>
+    </div>
     <ul class="sw-dice-drawer-list"></ul>
   </div>
 

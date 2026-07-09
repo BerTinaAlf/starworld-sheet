@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Ornate celestial frame">
+  <defs>
+    <style>
+      .line {
+        fill: none;
+        stroke: #d8bea2;
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .thin {
+        stroke-width: 1.8;
+      }
+
+      .fill {
+        fill: #d8bea2;
+        stroke: none;
+      }
+    </style>
+
+    <path id="diamond" d="M0 -8 L2.6 -2.6 L8 0 L2.6 2.6 L0 8 L-2.6 2.6 L-8 0 L-2.6 -2.6 Z"/>
+    <path id="tinySpark" d="M0 -10 L2.2 -2.2 L10 0 L2.2 2.2 L0 10 L-2.2 2.2 L-10 0 L-2.2 -2.2 Z"/>
+    <path id="starburst" d="M0 -43 L7 -8 L33 0 L7 8 L0 43 L-7 8 L-33 0 L-7 -8 Z"/>
+
+    <g id="topLines">
+      <path d="M105 86 H225"/>
+      <path d="M375 86 H495"/>
+      <path d="M98 86 C89 86 84 82 82 86 C84 90 89 86 98 86"/>
+      <path d="M502 86 C511 86 516 82 518 86 C516 90 511 86 502 86"/>
+      <path class="thin" d="M265 70 L278 83"/>
+      <path class="thin" d="M335 70 L322 83"/>
+      <path class="thin" d="M265 102 L278 89"/>
+      <path class="thin" d="M335 102 L322 89"/>
+    </g>
+
+    <g id="topFills">
+      <use href="#diamond" transform="translate(147 86) scale(0.62)"/>
+      <use href="#diamond" transform="translate(170 86) scale(0.88)"/>
+      <use href="#diamond" transform="translate(194 86) scale(0.62)"/>
+      <use href="#diamond" transform="translate(406 86) scale(0.62)"/>
+      <use href="#diamond" transform="translate(430 86) scale(0.88)"/>
+      <use href="#diamond" transform="translate(453 86) scale(0.62)"/>
+
+      <use href="#starburst" transform="translate(300 86)"/>
+      <circle cx="300" cy="37" r="2.1"/>
+      <circle cx="300" cy="135" r="2.1"/>
+      <circle cx="254" cy="86" r="2.8"/>
+      <circle cx="346" cy="86" r="2.8"/>
+      <circle cx="264" cy="59" r="1.8"/>
+      <circle cx="336" cy="59" r="1.8"/>
+      <circle cx="264" cy="113" r="1.8"/>
+      <circle cx="336" cy="113" r="1.8"/>
+    </g>
+
+    <g id="leftLines">
+      <circle cx="78" cy="107" r="6"/>
+      <path d="M78 114 V275"/>
+      <path d="M84 123 V265"/>
+      <circle cx="78" cy="136" r="3.2"/>
+      <circle cx="78" cy="166" r="2.6"/>
+      <circle cx="78" cy="246" r="2.4"/>
+      <path d="M78 274 V287"/>
+      <path d="M74 287 L78 296 L82 287"/>
+      <path d="M84 220 C93 218 96 231 86 236"/>
+      <path d="M84 238 C99 242 99 263 84 268"/>
+
+      <circle cx="78" cy="346" r="6"/>
+      <path d="M78 355 V378"/>
+      <circle cx="78" cy="379" r="3"/>
+
+      <path d="M78 462 L74 471 L78 480 L82 471 Z"/>
+      <path d="M78 480 V506"/>
+      <circle cx="78" cy="506" r="2.6"/>
+
+      <path d="M78 533 V688"/>
+      <path d="M84 542 V677"/>
+      <path d="M84 542 L96 556 V649"/>
+      <circle cx="78" cy="688" r="6"/>
+      <circle cx="78" cy="657" r="2.4"/>
+      <circle cx="78" cy="613" r="2.4"/>
+      <path d="M84 593 C93 591 96 604 86 609"/>
+      <path d="M84 611 C99 615 99 636 84 641"/>
+      <path d="M98 714 C89 714 84 718 82 714 C84 710 89 714 98 714"/>
+    </g>
+
+    <g id="leftFills">
+      <use href="#tinySpark" transform="translate(78 300) scale(0.42)"/>
+      <use href="#tinySpark" transform="translate(78 430) scale(0.42)"/>
+    </g>
+  </defs>
+
+  <g class="line">
+    <use href="#topLines"/>
+    <use href="#topLines" transform="translate(0 800) scale(1 -1)"/>
+    <use href="#leftLines"/>
+    <use href="#leftLines" transform="translate(600 0) scale(-1 1)"/>
+  </g>
+
+  <g class="fill">
+    <use href="#topFills"/>
+    <use href="#topFills" transform="translate(0 800) scale(1 -1)"/>
+    <use href="#leftFills"/>
+    <use href="#leftFills" transform="translate(600 0) scale(-1 1)"/>
+  </g>
+</svg>

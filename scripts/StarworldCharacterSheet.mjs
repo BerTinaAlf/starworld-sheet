@@ -113,6 +113,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       toggleEquipped:    StarworldCharacterSheet.#onToggleEquipped,
       toggleCondition:   StarworldCharacterSheet.#onToggleCondition,
       toggleDiceDrawer:  StarworldCharacterSheet.#onToggleDiceDrawer,
+      closeDiceDrawer:   StarworldCharacterSheet.#onCloseDiceDrawer,
       levelUpClass:      StarworldCharacterSheet.#onLevelUpClass,
       addMulticlass:     StarworldCharacterSheet.#onAddMulticlass,
       setTheme:          StarworldCharacterSheet.#onSetTheme,
@@ -478,6 +479,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
 
     // A3: 骰点历史抽屉注入
     this.#syncDiceHistory(el);
+    this.#initDiceDrawerClose(el);
 
     // G1: picker hover 预览（异步加载描述）
     this.#initPickerPreviews(el);
@@ -572,6 +574,17 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
     drawer.innerHTML = rows.join("") || "<li class=\"sw-dice-empty\">暂无骰点记录</li>";
   }
 
+  #initDiceDrawerClose(el) {
+    if (el.dataset.diceDrawerCloseReady === "1") return;
+    el.dataset.diceDrawerCloseReady = "1";
+    el.addEventListener("pointerdown", event => {
+      const drawer = el.querySelector(".sw-dice-drawer");
+      if (!drawer?.classList.contains("open")) return;
+      if (event.target?.closest?.(".sw-dice-drawer, .sw-dice-history-btn")) return;
+      drawer.classList.remove("open");
+    }, true);
+  }
+
   static async #onToggleDiceDrawer(event, target) {
     const drawer = this.element.querySelector(".sw-dice-drawer");
     if (drawer) {
@@ -579,6 +592,11 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       this.#syncDiceHistory(this.element);
     }
   }
+
+  static async #onCloseDiceDrawer(event, target) {
+    this.element.querySelector(".sw-dice-drawer")?.classList.remove("open");
+  }
+
 
   static async #onSetTheme(event, target) {
     const theme = target.dataset.theme ?? "";
