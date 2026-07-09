@@ -85,7 +85,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
 
   static DEFAULT_OPTIONS = {
     classes: ["starworld-sheet"],
-    position: { width: 800, height: 740 },
+    position: { width: 800, height: 800 },
     window: { resizable: true, minimizable: true },
     form: { submitOnChange: true },
     actions: {
@@ -166,9 +166,11 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
     const legacy = system.preparation ?? {};
     const legacyMode = legacy.mode ?? "";
     const method = system.method ?? legacyMode;
-    const methodPrepares = !!(system.canPrepare ?? CONFIG.DND5E?.spellcasting?.[method]?.prepares ?? (method === "prepared"));
     const rawPrepared = system.prepared;
     const hasModernPrepared = rawPrepared !== undefined && rawPrepared !== null;
+    const hasLegacyPrepared = legacy.prepared !== undefined;
+    const methodPrepares = !!(system.canPrepare ?? CONFIG.DND5E?.spellcasting?.[method]?.prepares
+      ?? (method === "prepared" || (!method && (hasModernPrepared || hasLegacyPrepared))));
     const preparedValue = hasModernPrepared ? Number(rawPrepared) : null;
     const isAlways = overridePrepared == null && ((preparedValue === values.always) || (legacyMode === "always"));
     const isPrepared = overridePrepared == null
@@ -412,14 +414,22 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
     const preparedCount = spellRows.filter(s => s.prep.countsPrepared).length;
 
     // 生命骰
-    const hitDice = actor.items.filter(i => i.type === "class").map(cls => ({
-      id: cls.id, name: cls.name,
-      denomination: cls.system?.hitDice ?? "d8",
-      available: cls.system?.hitDiceUsed != null
-        ? (cls.system.levels ?? 1) - (cls.system.hitDiceUsed ?? 0)
-        : (cls.system?.levels ?? 1),
-      total: cls.system?.levels ?? 1,
-    }));
+    const hitDice = actor.items.filter(i => i.type === "class").map(cls => {
+      const hd = cls.system?.hd ?? {};
+      const numeric = (value, fallback = 0) => {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : fallback;
+      };
+      const total = numeric(hd.max, numeric(cls.system?.levels, 1));
+      const spent = numeric(hd.spent, numeric(cls.system?.hitDiceUsed, 0));
+      const remaining = hd.value != null ? numeric(hd.value, total) : total - spent;
+      return {
+        id: cls.id, name: cls.name,
+        denomination: hd.denomination ?? cls.system?.hitDice ?? "d8",
+        available: Math.max(0, Math.min(total, remaining)),
+        total,
+      };
+    });
 
     // 经验值
     const xpData = system.details?.xp ?? {};
@@ -767,7 +777,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
   static async #onUseHitDie(event, target) {
     const cls = this.actor.items.get(target.dataset.classId);
     if (!cls) return;
-    this.actor.rollHitDie({ denomination: cls.system?.hitDice });
+    this.actor.rollHitDie({ denomination: cls.system?.hd?.denomination ?? cls.system?.hitDice });
   }
   static async #onCycleSkillProf(event, target) {
     if (!this.isEditable) return;
@@ -807,11 +817,13 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
     if (row) row.dataset.prep = prep.state;
 
     target.classList.toggle("on", prepared);
+    target.classList.toggle("always", prep.always);
     target.title = prep.title;
     target.setAttribute("aria-label", prep.title);
 
     const icon = target.querySelector("i");
     if (icon) icon.className = prep.iconClass;
+    else target.innerHTML = `<i class="${prep.iconClass}" inert></i>`;
   }
   static #updatePreparedCount(delta) {
     const counter = this.element.querySelector(".sw-prepared-hd[data-prepared-count]");

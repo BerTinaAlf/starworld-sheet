@@ -322,6 +322,10 @@
         {{/if}}
         {{/if}}
 
+        {{#unless (eq activeTab 'guide')}}
+        {{#unless (eq activeTab 'skills')}}
+        {{#unless (eq activeTab 'inventory')}}
+        {{#unless (eq activeTab 'spells')}}
         {{!-- F3: 职业面板（升级 + 兼职 + 模组状态） --}}
         <div class="sw-class-panel">
           {{!-- 模组状态栏 --}}
@@ -367,6 +371,10 @@
           {{/each}}
         </div>
         {{/if}}
+        {{/unless}}
+        {{/unless}}
+        {{/unless}}
+        {{/unless}}
 
         {{!-- 物品 (分类列表 + 格子视图) --}}
         {{#if (eq activeTab 'inventory')}}
@@ -379,6 +387,16 @@
         {{!-- 分类列表 --}}
         {{#each invGroups as |grp|}}
         <div class="sw-inv-section-hd">{{grp.label}}</div>
+        <div class="sw-inv-group-frame sw-spell-frame">
+          <span class="sw-spell-frame-edge top" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge right" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge bottom" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge left" aria-hidden="true"></span>
+          <span class="sw-inv-frame-corner tl" aria-hidden="true"></span>
+          <span class="sw-inv-frame-corner tr" aria-hidden="true"></span>
+          <span class="sw-inv-frame-corner br" aria-hidden="true"></span>
+          <span class="sw-inv-frame-corner bl" aria-hidden="true"></span>
+          <div class="sw-spell-frame-body sw-inv-frame-body">
         {{#each grp.items as |g|}}
         <div class="sw-item-row{{#if g.equipped}} equipped{{/if}}" data-item-id="{{g.id}}">
           <img class="sw-item-img" src="{{g.img}}" alt="">
@@ -393,6 +411,8 @@
           {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete" title="删除">✕</button>{{/if}}
         </div>
         {{/each}}
+          </div>
+        </div>
         {{else}}
         <div class="sw-empty-hint">📦 暂无物品</div>
         {{/each}}
@@ -520,6 +540,16 @@
         {{#if (eq activeTab 'features')}}
         {{#each featureGroups as |grp|}}
         <div class="sw-group-hd">{{grp.label}}</div>
+        <div class="sw-feature-frame sw-ornate-frame">
+          <span class="sw-ornate-frame-edge top" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-edge right" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-edge bottom" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-edge left" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-corner tl" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-corner tr" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-corner br" aria-hidden="true"></span>
+          <span class="sw-ornate-frame-corner bl" aria-hidden="true"></span>
+          <div class="sw-ornate-frame-body sw-feature-frame-body">
         {{#each grp.items as |item|}}
         <div class="sw-item-row{{#if (lookup @root.expandedItems item.id)}} expanded{{/if}}" data-item-id="{{item.id}}">
           <img class="sw-item-img" src="{{item.img}}" alt="">
@@ -537,6 +567,8 @@
           {{/if}}
         </div>
         {{/each}}
+          </div>
+        </div>
         {{else}}
         <div class="sw-empty-hint">⚔️ 暂无特性，添加职业/种族/专长后自动显示</div>
         {{/each}}

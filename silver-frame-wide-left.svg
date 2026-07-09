@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" aria-hidden="true">
+  <defs>
+    <filter id="glow" x="-45%" y="-70%" width="190%" height="240%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.25" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.24" stop-color="#8f99a6"/>
+      <stop offset="0.52" stop-color="#edf5ff"/>
+      <stop offset="0.78" stop-color="#69737f"/>
+      <stop offset="1" stop-color="#dfe8f2"/>
+    </linearGradient>
+
+    <linearGradient id="vSilver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.2" stop-color="#838d99"/>
+      <stop offset="0.52" stop-color="#eef6ff"/>
+      <stop offset="0.82" stop-color="#707a86"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+
+    <radialGradient id="cornerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.42" stop-color="#dfe9f4" stop-opacity="0.52"/>
+      <stop offset="1" stop-color="#8e9aa8" stop-opacity="0"/>
+    </radialGradient>
+
+    <path id="star8" d="M0 -12 L2.8 -2.8 L12 0 L2.8 2.8 L0 12 L-2.8 2.8 L-12 0 L-2.8 -2.8 Z"/>
+    <path id="star4" d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2 Z"/>
+
+    <g id="corner">
+      <circle r="16" fill="url(#cornerGlow)"/>
+      <use href="#star8" fill="#ffffff"/>
+      <use href="#star8" fill="none" stroke="#edf5ff" stroke-width="1"/>
+      <circle r="4" fill="none" stroke="#f8fbff" stroke-width="1.55"/>
+      <circle r="7" fill="none" stroke="#aab4c0" stroke-width="0.75" opacity="0.78"/>
+    </g>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M24 18 H180" stroke="url(#silver)" stroke-width="3.6"/>
+    <path d="M24 102 H180" stroke="url(#silver)" stroke-width="3.6"/>
+    <path d="M20 23 V97" stroke="url(#vSilver)" stroke-width="3.6"/>
+
+    <path d="M34 25 H180" stroke="#f6fbff" stroke-width="0.9" opacity="0.66"/>
+    <path d="M34 95 H180" stroke="#f6fbff" stroke-width="0.9" opacity="0.66"/>
+    <path d="M30 31 V89" stroke="#f6fbff" stroke-width="0.85" opacity="0.5"/>
+
+    <path d="M48 9 H98 L89 16 H43 Z" fill="#dfe8f2" stroke="#fbfdff" stroke-width="1.1" opacity="0.7"/>
+    <path d="M48 111 H98 L89 104 H43 Z" fill="#dfe8f2" stroke="#fbfdff" stroke-width="1.1" opacity="0.7"/>
+
+    <path d="M58 16 H140" stroke="#ffffff" stroke-width="1.8" opacity="0.55"/>
+    <path d="M58 104 H140" stroke="#ffffff" stroke-width="1.8" opacity="0.55"/>
+    <path d="M31 41 L43 54" stroke="#ffffff" stroke-width="2.6" opacity="0.62"/>
+    <path d="M31 79 L43 66" stroke="#ffffff" stroke-width="2.6" opacity="0.62"/>
+  </g>
+
+  <g fill="#ffffff" filter="url(#glow)">
+    <use href="#corner" transform="translate(20 18)"/>
+    <use href="#corner" transform="translate(20 102)"/>
+    <use href="#star4" transform="translate(67 18) scale(0.34)"/>
+    <use href="#star4" transform="translate(67 102) scale(0.34)"/>
+    <use href="#star4" transform="translate(20 60) scale(0.28)" opacity="0.72"/>
+  </g>
+</svg>

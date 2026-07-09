@@ -46,7 +46,7 @@
   font-family: "Noto Sans SC", "Inter", sans-serif;
   color: var(--sw-text);
   min-width: 800px;
-  min-height: 720px;
+  min-height: 780px;
 }
 .starworld-sheet .window-content {
   background: transparent;
@@ -219,10 +219,8 @@
   backdrop-filter: blur(12px) saturate(1.12);
   -webkit-backdrop-filter: blur(12px) saturate(1.12);
   border-right: 1px solid var(--sw-border);
-  overflow-y: auto;
+  overflow: visible;
   padding: 10px 8px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--sw-raised) transparent;
 }
 .sw-sidebar-hd {
   font-size: var(--sw-fs-xs);
@@ -383,16 +381,36 @@
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
+  outline: none;
+  box-shadow: none;
   color: var(--sw-muted);
   font-size: var(--sw-fs-md);
   letter-spacing: 0.04em;
   padding: 8px 12px;
   cursor: pointer;
-  transition: color var(--sw-t), border-color 0.15s;
+  transition: color var(--sw-t), text-shadow 0.15s;
   font-family: inherit;
 }
 .sw-tab:hover { color: var(--sw-text); }
-.sw-tab.active { color: var(--sw-gold); border-bottom-color: var(--sw-gold); }
+.sw-tab:focus,
+.sw-tab:focus-visible,
+.sw-tab.active {
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+.sw-tab.active {
+  color: #f8fbff;
+  border-bottom-color: transparent;
+  text-shadow: 0 0 7px rgba(232,242,255,0.55);
+  background-image:
+    url("../silver-frame-wide-left.svg"),
+    url("../silver-frame-wide-right.svg"),
+    url("../silver-frame-wide-mid.svg");
+  background-position: left center, right center, center center;
+  background-size: 46px 32px, 46px 32px, 46px 32px;
+  background-repeat: no-repeat, no-repeat, repeat-x;
+}
 
 /* ── Content area ── */
 .sw-content {
@@ -552,6 +570,17 @@
   padding: 8px 0 4px;
   border-bottom: 1px solid var(--sw-border);
   margin-bottom: 4px;
+}
+.sw-feature-frame.sw-ornate-frame {
+  min-height: 78px;
+  margin: 4px 0 12px;
+  padding: 28px 24px 26px;
+}
+.sw-feature-frame-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 /* ── Item rows ── */
@@ -917,23 +946,40 @@
 
 /* ── v0.6: 货币栏 ── */
 .sw-currency {
-  display: flex; gap: 4px; padding: 6px 4px 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 6px;
+  padding: 6px 4px 4px;
   border-top: 1px solid var(--sw-border); margin-top: 4px;
-  flex-wrap: wrap;
 }
 .sw-coin {
-  flex: 1; min-width: 56px; display: flex; align-items: center; gap: 4px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(28px, 36px) minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   background: var(--sw-raised); border-radius: 5px; padding: 3px 6px;
   border: 1px solid var(--sw-border);
+  overflow: hidden;
 }
-.sw-coin-lbl { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; }
+.sw-coin-lbl {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
 .sw-coin.gp .sw-coin-lbl { color: var(--sw-gold); }
 .sw-coin.sp .sw-coin-lbl { color: #d0d0d0; }
 .sw-coin.cp .sw-coin-lbl { color: #cd7f32; }
 .sw-coin.pp .sw-coin-lbl { color: #c0c0ff; }
 .sw-coin.ep .sw-coin-lbl { color: #a0d0a0; }
 .sw-coin input {
-  width: 40px; background: transparent; border: none; outline: none;
+  width: 36px; background: transparent; border: none; outline: none;
   color: var(--sw-text); font-size: 0.75rem; font-weight: 700; text-align: right; padding: 0;
 }
 
@@ -1221,7 +1267,6 @@ details[open] .sw-picker-arrow { transform: rotate(180deg); }
 .sw-spell-known-mark { color: #4caf50; font-size: 0.7rem; flex-shrink: 0; }
 
 /* ── Focus-visible 键盘导航 ── */
-.sw-tab:focus-visible,
 .sw-btn-sm:focus-visible,
 .sw-skill-btn:focus-visible,
 .sw-abl-btn:focus-visible,
@@ -1741,6 +1786,42 @@ details.sw-multiclass-picker:not([open]) .sw-multiclass-list { display: none; }
   border-bottom: 1px solid var(--sw-border);
   margin-top: 4px;
 }
+.sw-inv-group-frame {
+  min-height: 78px;
+  margin: 7px 0 13px;
+  padding: 22px 28px 21px;
+}
+.sw-inv-frame-body {
+  position: relative;
+  z-index: 2;
+}
+.sw-inv-group-frame::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  inset: 10px 12px;
+  border: 1px solid var(--sw-spell-frame-line);
+  border-radius: 2px;
+  box-shadow: 0 0 5px rgba(216,190,162,0.08);
+}
+.sw-inv-group-frame .sw-spell-frame-edge {
+  display: none;
+}
+.sw-inv-frame-corner {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  width: 80px;
+  height: 79px;
+  background: center / contain no-repeat url("../silver-corner-flourish.svg");
+  opacity: 0.9;
+  filter: drop-shadow(0 0 5px rgba(216,190,162,0.14));
+}
+.sw-inv-frame-corner.tl { top: 0; left: 0; }
+.sw-inv-frame-corner.tr { top: 0; right: 0; transform: scaleX(-1); }
+.sw-inv-frame-corner.br { right: 0; bottom: 0; transform: scale(-1); }
+.sw-inv-frame-corner.bl { left: 0; bottom: 0; transform: scaleY(-1); }
 /* 物品行装备高亮 */
 .sw-item-row.equipped { background: rgba(74,222,128,0.05); border-left: 2px solid #4ade80; }
 .sw-item-qty { font-size: 0.65rem; color: var(--sw-muted); margin-right: auto; }
