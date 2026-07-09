@@ -150,6 +150,58 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       .slice(0, 200);
   }
 
+  static #spellPreparationValues() {
+    const states = CONFIG.DND5E?.spellPreparationStates ?? {};
+    return {
+      unprepared: states.unprepared?.value ?? 0,
+      prepared: states.prepared?.value ?? 1,
+      always: states.always?.value ?? 2,
+    };
+  }
+
+  static #spellPreparationState(item, overridePrepared = null) {
+    const system = item?.system ?? {};
+    const values = StarworldCharacterSheet.#spellPreparationValues();
+    const level = system.level ?? 0;
+    const legacy = system.preparation ?? {};
+    const legacyMode = legacy.mode ?? "";
+    const method = system.method ?? legacyMode;
+    const methodPrepares = !!(system.canPrepare ?? CONFIG.DND5E?.spellcasting?.[method]?.prepares ?? (method === "prepared"));
+    const rawPrepared = system.prepared;
+    const hasModernPrepared = rawPrepared !== undefined && rawPrepared !== null;
+    const preparedValue = hasModernPrepared ? Number(rawPrepared) : null;
+    const isAlways = overridePrepared == null && ((preparedValue === values.always) || (legacyMode === "always"));
+    const isPrepared = overridePrepared == null
+      ? (isAlways || (hasModernPrepared ? (preparedValue === values.prepared) : !!legacy.prepared))
+      : !!overridePrepared;
+    const state = isAlways ? "always"
+      : isPrepared ? "prepared"
+      : ["pact", "innate", "atwill"].includes(method) ? method
+      : (legacyMode && legacyMode !== "prepared") ? legacyMode
+      : "";
+    const applicable = (level > 0) && (methodPrepares || isAlways);
+    const iconClass = `fa-${isPrepared ? "solid" : "regular"} fa-${isAlways ? "certificate" : "sun"}`;
+
+    return {
+      applicable,
+      active: isPrepared,
+      always: isAlways,
+      countsPrepared: applicable && methodPrepares && isPrepared && !isAlways,
+      iconClass,
+      state,
+      title: isAlways ? "始终准备" : isPrepared ? "已准备（点击取消）" : "未准备（点击准备）",
+      toggleable: applicable && methodPrepares && !isAlways,
+    };
+  }
+
+  static #spellPreparedUpdateData(item, prepared) {
+    const values = StarworldCharacterSheet.#spellPreparationValues();
+    if (item?.system?.prepared !== undefined) {
+      return { "system.prepared": prepared ? values.prepared : values.unprepared };
+    }
+    return { "system.preparation.prepared": prepared };
+  }
+
   /* ─── Context ─────────────────────────────────────────────────────── */
   async _prepareContext(options) {
     const ctx    = await super._prepareContext(options);
@@ -318,9 +370,13 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 
     // F1:
+    const spellRows = spells.map(item => ({
+      item,
+      prep: StarworldCharacterSheet.#spellPreparationState(item),
+    }));
     const spellsByLevel = [];
     for (let lv = 0; lv <= 9; lv++) {
-      const group = spells.filter(s => (s.system.level ?? 0) === lv);
+      const group = spellRows.filter(s => (s.item.system.level ?? 0) === lv);
       if (group.length) spellsByLevel.push({ level: lv, label: StarworldCharacterSheet.#SPELL_LEVEL_ZH[lv], spells: group });
     }
 
@@ -353,7 +409,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       const clsLevel = spellcastingCls?.system?.levels ?? 1;
       return Math.max(1, clsLevel + ablMod);
     })();
-    const preparedCount = spells.filter(s => s.system?.preparation?.prepared && s.system?.level > 0).length;
+    const preparedCount = spellRows.filter(s => s.prep.countsPrepared).length;
 
     // 生命骰
     const hitDice = actor.items.filter(i => i.type === "class").map(cls => ({
@@ -747,13 +803,15 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
   }
   static #setSpellPreparedUI(target, prepared, item) {
     const row = target.closest("[data-item-id]");
-    const mode = item?.system?.preparation?.mode ?? "";
-    const unpreparedPrep = mode && (mode !== "prepared") ? mode : "";
-    if (row) row.dataset.prep = prepared ? "prepared" : unpreparedPrep;
+    const prep = StarworldCharacterSheet.#spellPreparationState(item, prepared);
+    if (row) row.dataset.prep = prep.state;
 
     target.classList.toggle("on", prepared);
-    target.textContent = prepared ? "🔵" : "⚪";
-    target.title = prepared ? "已准备（点击取消）" : "未准备（点击准备）";
+    target.title = prep.title;
+    target.setAttribute("aria-label", prep.title);
+
+    const icon = target.querySelector("i");
+    if (icon) icon.className = prep.iconClass;
   }
   static #updatePreparedCount(delta) {
     const counter = this.element.querySelector(".sw-prepared-hd[data-prepared-count]");
@@ -767,13 +825,16 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
   static async #onToggleSpellPrepared(event, target) {
     const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
     if (!item || item.system?.level === 0) return;
-    const prev = !!item.system.preparation?.prepared;
+    const currentPrep = StarworldCharacterSheet.#spellPreparationState(item);
+    if (!currentPrep.toggleable) return;
+
+    const prev = currentPrep.active;
     const next = !prev;
     StarworldCharacterSheet.#setSpellPreparedUI(target, next, item);
     StarworldCharacterSheet.#updatePreparedCount.call(this, next ? 1 : -1);
     target.disabled = true;
     try {
-      await item.update({ "system.preparation.prepared": next }, { render: false });
+      await item.update(StarworldCharacterSheet.#spellPreparedUpdateData(item, next), { render: false });
     } catch (err) {
       StarworldCharacterSheet.#setSpellPreparedUI(target, prev, item);
       StarworldCharacterSheet.#updatePreparedCount.call(this, prev ? 1 : -1);

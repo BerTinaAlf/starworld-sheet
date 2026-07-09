@@ -477,26 +477,33 @@
           <span class="sw-spell-frame-corner br" aria-hidden="true"></span>
           <span class="sw-spell-frame-corner bl" aria-hidden="true"></span>
           <div class="sw-spell-frame-body">
-        {{#each grp.spells as |item|}}
-        <div class="sw-item-row{{#if item.system.concentration}} concentrating{{/if}}"
-             data-item-id="{{item.id}}"
-             data-prep="{{#if item.system.preparation.prepared}}prepared{{else}}{{#if (ne item.system.preparation.mode 'prepared')}}{{item.system.preparation.mode}}{{/if}}{{/if}}">
-          {{!-- 法术准备切换（非戏法） --}}
-          {{#if (gt item.system.level 0)}}
-          {{#unless @root.alwaysPrepared}}
-          <button type="button" class="sw-prep-btn{{#if item.system.preparation.prepared}} on{{/if}}"
+        {{#each grp.spells as |spell|}}
+        <div class="sw-item-row{{#if spell.item.system.concentration}} concentrating{{/if}}"
+             data-item-id="{{spell.item.id}}"
+             data-prep="{{spell.prep.state}}">
+          {{!-- 法术准备状态（沿用 dnd5e 的太阳/徽章语义） --}}
+          {{#if spell.prep.applicable}}
+          {{#if spell.prep.toggleable}}
+          <button type="button" class="sw-prep-btn{{#if spell.prep.active}} on{{/if}}{{#if spell.prep.always}} always{{/if}}"
                   data-action="toggleSpellPrepared"
-                  title="{{#if item.system.preparation.prepared}}已准备（点击取消）{{else}}未准备（点击准备）{{/if}}">
-            {{#if item.system.preparation.prepared}}🔵{{else}}⚪{{/if}}
+                  title="{{spell.prep.title}}"
+                  aria-label="{{spell.prep.title}}">
+            <i class="{{spell.prep.iconClass}}" inert></i>
           </button>
-          {{/unless}}
+          {{else}}
+          <span class="sw-prep-btn sw-prep-static{{#if spell.prep.active}} on{{/if}}{{#if spell.prep.always}} always{{/if}}"
+                title="{{spell.prep.title}}"
+                aria-label="{{spell.prep.title}}">
+            <i class="{{spell.prep.iconClass}}" inert></i>
+          </span>
+          {{/if}}
           {{else}}
           <span class="sw-prep-spacer"></span>
           {{/if}}
-          <img class="sw-item-img" src="{{item.img}}" alt="">
-          <span class="sw-item-name">{{item.name}}</span>
-          {{#if item.system.concentration}}<span class="sw-conc-badge">专</span>{{/if}}
-          {{#if item.system.ritual}}<span class="sw-ritual-badge">仪</span>{{/if}}
+          <img class="sw-item-img" src="{{spell.item.img}}" alt="">
+          <span class="sw-item-name">{{spell.item.name}}</span>
+          {{#if spell.item.system.concentration}}<span class="sw-conc-badge">专</span>{{/if}}
+          {{#if spell.item.system.ritual}}<span class="sw-ritual-badge">仪</span>{{/if}}
           <button type="button" class="sw-btn-sm gold" data-action="itemAction" data-action-type="use">施放</button>
           <button type="button" class="sw-btn-sm" data-action="itemAction" data-action-type="edit">✎</button>
           {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete">✕</button>{{/if}}
