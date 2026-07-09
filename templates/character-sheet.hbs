@@ -152,7 +152,7 @@
       <div class="sw-spell-stats">
         <div class="sw-ss-item"><span class="sw-ss-val">{{spellDC}}</span><span class="sw-ss-lbl">豁免DC</span></div>
         {{#if spellAtkFmt}}<div class="sw-ss-item"><span class="sw-ss-val">{{spellAtkFmt}}</span><span class="sw-ss-lbl">法术攻击</span></div>{{/if}}
-        <div class="sw-ss-item"><span class="sw-ss-val" style="font-size:0.65rem;text-transform:uppercase">{{spellAbility}}</span><span class="sw-ss-lbl">施法属性</span></div>
+        <div class="sw-ss-item"><span class="sw-ss-val sw-ss-ability">{{spellAbility}}</span><span class="sw-ss-lbl">施法属性</span></div>
       </div>
       {{/if}}
     </aside>
@@ -253,7 +253,16 @@
         {{!-- 技能 --}}
         {{#if (eq activeTab 'skills')}}
         <div class="sw-skills-tab">
-          <div class="sw-skill-list">
+          <div class="sw-skill-list sw-ornate-frame sw-skills-frame">
+            <span class="sw-ornate-frame-edge top" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-edge right" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-edge bottom" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-edge left" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner tl" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner tr" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner br" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner bl" aria-hidden="true"></span>
+            <div class="sw-ornate-frame-body sw-skill-frame-body">
             {{#each skills as |s|}}
             <div class="sw-skill-row">
               {{#if @root.canEdit}}
@@ -270,9 +279,19 @@
               <span class="sw-skill-passive" title="被动值">{{s.passive}}</span>
             </div>
             {{/each}}
+            </div>
           </div>
           {{!-- 熟练 & 抗性 --}}
-          <div class="sw-prof-block">
+          <div class="sw-prof-block sw-ornate-frame sw-prof-frame">
+            <span class="sw-ornate-frame-edge top" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-edge right" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-edge bottom" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-edge left" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner tl" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner tr" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner br" aria-hidden="true"></span>
+            <span class="sw-ornate-frame-corner bl" aria-hidden="true"></span>
+            <div class="sw-ornate-frame-body sw-prof-frame-body">
             {{#if armorProf}}<div class="sw-prof-row"><span class="sw-prof-lbl">护甲熟练</span><span class="sw-prof-val">{{armorProf}}</span></div>{{/if}}
             {{#if weaponProf}}<div class="sw-prof-row"><span class="sw-prof-lbl">武器熟练</span><span class="sw-prof-val">{{weaponProf}}</span></div>{{/if}}
             {{#if toolProf}}<div class="sw-prof-row"><span class="sw-prof-lbl">工具熟练</span><span class="sw-prof-val">{{toolProf}}</span></div>{{/if}}
@@ -281,6 +300,7 @@
             {{#if dmgImmune}}<div class="sw-prof-row"><span class="sw-prof-lbl">伤害免疫</span><span class="sw-prof-val sw-immune">{{dmgImmune}}</span></div>{{/if}}
             {{#if dmgVuln}}<div class="sw-prof-row"><span class="sw-prof-lbl">伤害易伤</span><span class="sw-prof-val sw-vuln">{{dmgVuln}}</span></div>{{/if}}
             {{#if condImmune}}<div class="sw-prof-row"><span class="sw-prof-lbl">状态免疫</span><span class="sw-prof-val sw-immune">{{condImmune}}</span></div>{{/if}}
+            </div>
           </div>
         </div>
         {{/if}}
@@ -319,13 +339,14 @@
             <span class="sw-cls-lv">Lv.{{c.system.levels}}</span>
             {{#if @root.canEdit}}
             <button type="button" class="sw-cls-lvup" data-action="levelUpClass" data-class-id="{{c.id}}" title="升级">▲</button>
+            <button type="button" class="sw-cls-delete" data-action="deleteClass" data-class-id="{{c.id}}" title="删除职业">✕</button>
             {{/if}}
           </div>
           {{else}}
           <div class="sw-cls-empty">尚未选择职业</div>
           {{/each}}
           {{!-- 兼职按钮 --}}
-          {{#if isEditable}}
+          {{#if canEdit}}
           <details class="sw-multiclass-picker">
             <summary class="sw-multiclass-summary">＋ 添加兼职 <span class="sw-picker-arrow">▾</span></summary>
             <ul class="sw-picker-list sw-multiclass-list">
@@ -403,7 +424,7 @@
         {{!-- 法术 --}}
         {{#if (eq activeTab 'spells')}}
         {{!-- 法术选择器（有职业+可编辑时显示） --}}
-        {{#if isEditable}}{{#if hasSpellcasting}}
+        {{#if canEdit}}{{#if hasSpellcasting}}
         <details class="sw-spell-picker">
           <summary class="sw-spell-picker-summary">✨ 添加法术 <span class="sw-picker-arrow">▾</span></summary>
           <div class="sw-spell-picker-body">
@@ -433,38 +454,7 @@
         <div class="sw-spell-stats">
           <div class="sw-ss-item"><span class="sw-ss-val">{{spellDC}}</span><span class="sw-ss-lbl">豁免DC</span></div>
           {{#if spellAtkFmt}}<div class="sw-ss-item"><span class="sw-ss-val">{{spellAtkFmt}}</span><span class="sw-ss-lbl">法术攻击</span></div>{{/if}}
-          <div class="sw-ss-item"><span class="sw-ss-val" style="font-size:0.65rem;text-transform:uppercase">{{spellAbility}}</span><span class="sw-ss-lbl">施法属性</span></div>
-        </div>
-        {{/if}}
-        {{!-- 法术环位 + 契约法术位 --}}
-        {{#if spellSlots}}
-        <div class="sw-slot-row">
-          {{#each spellSlots as |s|}}
-          <div class="sw-slot-chip">
-            <span class="sw-slot-lv">{{s.level}}</span>
-            <div class="sw-slot-pips">
-              {{#each (array 1 2 3 4 5 6 7 8 9) as |i|}}{{#if (gte ../s.max i)}}
-              <span class="sw-slot-pip{{#if (gte ../s.value i)}} on{{/if}}"
-                    data-action="{{#if (gte ../s.value i)}}spendSlot{{else}}recoverSlot{{/if}}"
-                    data-level="{{../s.level}}"
-                    title="{{#if (gte ../s.value i)}}消耗{{else}}恢复{{/if}}{{../s.level}}环法术位"></span>
-              {{/if}}{{/each}}
-            </div>
-          </div>
-          {{/each}}
-          {{#if pactSlot}}
-          <div class="sw-slot-chip sw-pact-chip">
-            <span class="sw-slot-lv">契</span>
-            <div class="sw-slot-pips">
-              {{#each (array 1 2 3 4 5) as |i|}}{{#if (gte ../pactSlot.max i)}}
-              <span class="sw-slot-pip{{#if (gte ../pactSlot.value i)}} on{{/if}}"
-                    data-action="{{#if (gte ../pactSlot.value i)}}spendSlot{{else}}recoverSlot{{/if}}"
-                    data-level="pact"
-                    title="{{#if (gte ../pactSlot.value i)}}消耗{{else}}恢复{{/if}}契约法术位（{{../pactSlot.level}}环）"></span>
-              {{/if}}{{/each}}
-            </div>
-          </div>
-          {{/if}}
+          <div class="sw-ss-item"><span class="sw-ss-val sw-ss-ability">{{spellAbility}}</span><span class="sw-ss-lbl">施法属性</span></div>
         </div>
         {{/if}}
         {{!-- 法术准备计数 --}}

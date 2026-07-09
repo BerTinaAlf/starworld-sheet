@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96" role="img" aria-label="Compact ornate spell stats frame">
+  <defs>
+    <linearGradient id="frameStroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ead9b8" stop-opacity="0.22"/>
+      <stop offset="0.18" stop-color="#f4efe4" stop-opacity="0.88"/>
+      <stop offset="0.5" stop-color="#d8bea2" stop-opacity="0.72"/>
+      <stop offset="0.82" stop-color="#f4efe4" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#ead9b8" stop-opacity="0.22"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-12%" y="-45%" width="124%" height="190%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <path id="diamond" d="M0 -8 L2.5 -2.5 L8 0 L2.5 2.5 L0 8 L-2.5 2.5 L-8 0 L-2.5 -2.5 Z"/>
+    <path id="spark" d="M0 -11 L2.2 -2.2 L11 0 L2.2 2.2 L0 11 L-2.2 2.2 L-11 0 L-2.2 -2.2 Z"/>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M47 18 H126 M194 18 H273
+         C292 18 306 31 306 48
+         C306 65 292 78 273 78
+         H194 M126 78 H47
+         C28 78 14 65 14 48
+         C14 31 28 18 47 18"
+      stroke="url(#frameStroke)"
+      stroke-width="3"
+      filter="url(#softGlow)"/>
+
+    <path
+      d="M51 23 H132 M188 23 H269
+         C284 23 295 34 295 48
+         C295 62 284 73 269 73
+         H188 M132 73 H51
+         C36 73 25 62 25 48
+         C25 34 36 23 51 23"
+      stroke="#ead9b8"
+      stroke-width="1.1"
+      opacity="0.38"/>
+
+    <path d="M16 48 H6 M314 48 H304" stroke="#f4efe4" stroke-width="3" opacity="0.76" filter="url(#softGlow)"/>
+    <path d="M32 27 C22 34 19 43 20 48 C19 53 22 62 32 69" stroke="#f4efe4" stroke-width="1.4" opacity="0.56"/>
+    <path d="M288 27 C298 34 301 43 300 48 C301 53 298 62 288 69" stroke="#f4efe4" stroke-width="1.4" opacity="0.56"/>
+  </g>
+
+  <g fill="#f4efe4" filter="url(#softGlow)">
+    <use href="#spark" transform="translate(96 18) scale(0.62)"/>
+    <use href="#spark" transform="translate(224 18) scale(0.62)"/>
+    <use href="#spark" transform="translate(96 78) scale(0.62)"/>
+    <use href="#spark" transform="translate(224 78) scale(0.62)"/>
+    <use href="#diamond" transform="translate(160 18) scale(0.52)"/>
+    <use href="#diamond" transform="translate(160 78) scale(0.52)"/>
+    <use href="#diamond" transform="translate(14 48) scale(0.7)"/>
+    <use href="#diamond" transform="translate(306 48) scale(0.7)"/>
+  </g>
+
+  <g fill="#d8bea2" opacity="0.72">
+    <circle cx="56" cy="18" r="2.1"/>
+    <circle cx="264" cy="18" r="2.1"/>
+    <circle cx="56" cy="78" r="2.1"/>
+    <circle cx="264" cy="78" r="2.1"/>
+  </g>
+</svg>

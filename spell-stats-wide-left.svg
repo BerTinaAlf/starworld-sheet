@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" aria-hidden="true">
+  <defs>
+    <filter id="glow" x="-35%" y="-50%" width="170%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ead9b8" stop-opacity="0.12"/>
+      <stop offset="0.28" stop-color="#f4efe4" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#d8bea2" stop-opacity="0.72"/>
+    </linearGradient>
+    <path id="spark" d="M0 -10 L2.2 -2.2 L10 0 L2.2 2.2 L0 10 L-2.2 2.2 L-10 0 L-2.2 -2.2 Z"/>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M92 14 H34 C17 14 7 24 7 36 C7 48 17 58 34 58 H92" stroke="url(#line)" stroke-width="1.8"/>
+    <path d="M92 20 H38 C25 20 18 27 18 36 C18 45 25 52 38 52 H92" stroke="#ead9b8" stroke-width="0.75" opacity="0.34"/>
+    <path d="M10 36 H2" stroke="#f4efe4" stroke-width="1.7" opacity="0.66"/>
+    <path d="M28 24 C18 30 16 35 17 36 C16 37 18 42 28 48" stroke="#f4efe4" stroke-width="0.9" opacity="0.46"/>
+  </g>
+
+  <g fill="#f4efe4" filter="url(#glow)">
+    <use href="#spark" transform="translate(62 14) scale(0.52)"/>
+    <use href="#spark" transform="translate(62 58) scale(0.52)"/>
+    <path d="M7 28 L9 34 L15 36 L9 38 L7 44 L5 38 L-1 36 L5 34 Z"/>
+  </g>
+</svg>

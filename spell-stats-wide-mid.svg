@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" aria-hidden="true">
+  <defs>
+    <filter id="glow" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.75" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <path id="spark" d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2 Z"/>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" filter="url(#glow)">
+    <path d="M0 14 H96" stroke="#d8bea2" stroke-width="1.7" opacity="0.66"/>
+    <path d="M0 58 H96" stroke="#d8bea2" stroke-width="1.7" opacity="0.66"/>
+    <path d="M0 20 H96" stroke="#ead9b8" stroke-width="0.7" opacity="0.26"/>
+    <path d="M0 52 H96" stroke="#ead9b8" stroke-width="0.7" opacity="0.26"/>
+  </g>
+
+  <g fill="#f4efe4" filter="url(#glow)" opacity="0.9">
+    <use href="#spark" transform="translate(48 14) scale(0.42)"/>
+    <use href="#spark" transform="translate(48 58) scale(0.42)"/>
+  </g>
+</svg>

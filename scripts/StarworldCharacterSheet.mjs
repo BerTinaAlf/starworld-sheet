@@ -85,7 +85,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
 
   static DEFAULT_OPTIONS = {
     classes: ["starworld-sheet"],
-    position: { width: 880, height: 760 },
+    position: { width: 800, height: 740 },
     window: { resizable: true, minimizable: true },
     form: { submitOnChange: true },
     actions: {
@@ -106,8 +106,6 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       toggleInspiration: StarworldCharacterSheet.#onToggleInspiration,
       shortRest:         StarworldCharacterSheet.#onShortRest,
       longRest:          StarworldCharacterSheet.#onLongRest,
-      spendSlot:         StarworldCharacterSheet.#onSpendSlot,
-      recoverSlot:       StarworldCharacterSheet.#onRecoverSlot,
       useHitDie:         StarworldCharacterSheet.#onUseHitDie,
       cycleSkillProf:    StarworldCharacterSheet.#onCycleSkillProf,
       toggleEquipped:    StarworldCharacterSheet.#onToggleEquipped,
@@ -115,6 +113,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       toggleDiceDrawer:  StarworldCharacterSheet.#onToggleDiceDrawer,
       closeDiceDrawer:   StarworldCharacterSheet.#onCloseDiceDrawer,
       levelUpClass:      StarworldCharacterSheet.#onLevelUpClass,
+      deleteClass:       StarworldCharacterSheet.#onDeleteClass,
       addMulticlass:     StarworldCharacterSheet.#onAddMulticlass,
       setTheme:          StarworldCharacterSheet.#onSetTheme,
     },
@@ -240,18 +239,83 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       .filter(g => g.items.length > 0);
 
     const spells    = actor.items.filter(i => i.type === "spell").sort((a,b) => (a.system.level??0)-(b.system.level??0));
-    const features  = actor.items.filter(i => ["feat","race","class","subclass","background"].includes(i.type));
 
-    const FEAT_GROUPS = [
-      { type: "class",      label: "⚔ 职业特性" },
-      { type: "subclass",   label: "✦ 子职业特性" },
-      { type: "race",       label: "🌿 种族特性" },
-      { type: "background", label: "📖 背景特性" },
-      { type: "feat",       label: "★ 专长" },
-    ];
-    const featureGroups = FEAT_GROUPS
-      .map(g => ({ ...g, items: features.filter(i => i.type === g.type) }))
-      .filter(g => g.items.length > 0);
+    // F3: 多职业 — 所有 class 物品
+    const classes = actor.items.filter(i => i.type === "class").sort((a,b) => a.sort-b.sort);
+
+    // 特性页按 dnd5e 原卡的“来源”分类：职业/种族/背景/其它，而不是按 Item 大类型粗分。
+    const features = actor.items
+      .filter(i => ["feat", "subclass"].includes(i.type))
+      .sort((a, b) => a.sort - b.sort);
+
+    const classFeatureOrder = new Map(classes.map((cls, i) => [cls.id, 100 + (i * 100)]));
+    const featureGroupMap = new Map();
+    const ensureFeatureGroup = (key, label, order) => {
+      if (!featureGroupMap.has(key)) featureGroupMap.set(key, { key, label, order, items: [] });
+      return featureGroupMap.get(key);
+    };
+    const classFeatureGroup = (cls) => ({
+      key: `class:${cls.id}`,
+      label: `⚔ ${cls.name} 特性`,
+      order: classFeatureOrder.get(cls.id) ?? 900,
+    });
+    const otherFeatureGroup = { key: "other", label: "✦ 其他特性", order: 4000 };
+
+    const featureOriginGroup = (item) => {
+      const originFlag = item.getFlag?.("dnd5e", "advancementRoot")
+        ?? item.getFlag?.("dnd5e", "advancementOrigin");
+      const [originId] = originFlag?.split(".") ?? [];
+      const origin = originId ? actor.items.get(originId) : null;
+
+      switch (origin?.type) {
+        case "race":
+          return { key: "species", label: "🌿 种族特性", order: 1000 };
+        case "background":
+          return { key: "background", label: "📖 背景特性", order: 2000 };
+        case "class":
+          return classFeatureGroup(origin);
+        case "subclass": {
+          const owner = classes.find(cls => cls.system?.identifier === origin.system?.classIdentifier);
+          return owner ? classFeatureGroup(owner) : otherFeatureGroup;
+        }
+      }
+
+      if (item.type === "subclass") {
+        const owner = classes.find(cls => cls.system?.identifier === item.system?.classIdentifier);
+        return owner ? classFeatureGroup(owner) : otherFeatureGroup;
+      }
+
+      switch (item.system?.type?.value) {
+        case "class":
+          return classes.length === 1
+            ? classFeatureGroup(classes[0])
+            : { key: "class", label: "⚔ 职业特性", order: 900 };
+        case "race":
+          return { key: "species", label: "🌿 种族特性", order: 1000 };
+        case "background":
+          return { key: "background", label: "📖 背景特性", order: 2000 };
+        case "feat":
+          return { key: "feat", label: "★ 专长", order: 3000 };
+        case "monster":
+          return { key: "monster", label: "☠ 怪物特性", order: 3500 };
+        case "supernaturalGift":
+          return { key: "supernaturalGift", label: "✦ 超自然恩赐", order: 3600 };
+        case "enchantment":
+          return { key: "enchantment", label: "✧ 附魔特性", order: 3700 };
+        case "vehicle":
+          return { key: "vehicle", label: "⚙ 载具特性", order: 3800 };
+        default:
+          return otherFeatureGroup;
+      }
+    };
+
+    for (const item of features) {
+      const group = featureOriginGroup(item);
+      ensureFeatureGroup(group.key, group.label, group.order).items.push(item);
+    }
+    const featureGroups = [...featureGroupMap.values()]
+      .filter(g => g.items.length > 0)
+      .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 
     // F1:
     const spellsByLevel = [];
@@ -260,9 +324,6 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       if (group.length) spellsByLevel.push({ level: lv, label: StarworldCharacterSheet.#SPELL_LEVEL_ZH[lv], spells: group });
     }
 
-    // F3: 多职业 — 所有 class 物品
-    const classes = actor.items.filter(i => i.type === "class").sort((a,b) => a.sort-b.sort);
-
     // 模组状态检测
     const modStatus = {
       midi:   !!game.modules?.get("midi-qol")?.active,
@@ -270,9 +331,6 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       cpr:    !!game.modules?.get("chris-premades")?.active,
       seq:    !!game.modules?.get("sequencer")?.active,
     };
-
-    // 特性类型汉化
-    const FEATURE_TYPE_ZH = { feat:"专长", race:"种族", class:"职业", subclass:"子职业", background:"背景" };
 
     // 物品使用次数 Map（itemId -> {value, max}）
     const itemUsesMap = {};
@@ -343,18 +401,6 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       dmg: w.system?.damage?.parts?.[0]?.[0] ?? "—",
     }));
 
-    const spellSlots = Object.entries(system.spells ?? {})
-      .filter(([k]) => k.startsWith("spell") && !isNaN(k.slice(5)))
-      .map(([key, slot]) => ({ key, level: Number(key.slice(5)), value: slot.value, max: slot.max }))
-      .filter(s => s.max > 0);
-
-    // 契约法术位（术士）
-    const pactSlot = (() => {
-      const p = system.spells?.pact;
-      if (!p || !p.max) return null;
-      return { key: "pact", level: p.level ?? 0, value: p.value ?? 0, max: p.max, isPact: true };
-    })();
-
     // E: 展开状态
     const expandedItems = flags.expandedItems ?? {};
 
@@ -409,7 +455,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
 
     return {
       actor, system, abilities, skills, hp,
-      weapons, equipment, spells, spellsByLevel, features, featureGroups, spellSlots, pactSlot, quickWeapons,
+      weapons, equipment, spells, spellsByLevel, features, featureGroups, quickWeapons,
       classes, gridItems, invGroups,
       modStatus,
       isDying, deathSuccesses, deathFailures, conditions, allConditions,
@@ -422,7 +468,7 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
       knownSpellNames: Object.fromEntries(spells.map(s => [s.name, true])),
       hasSpellcasting: !!actor.items.find(i => i.type === "class"),
       alwaysPrepared, maxPrepared, preparedCount,
-      FEATURE_TYPE_ZH, itemUsesMap,
+      itemUsesMap,
       proficiencyBonus: system.attributes?.prof ?? 0,
       initiative: system.attributes?.init?.total ?? 0,
       ac: system.attributes?.ac?.value ?? 10,
@@ -662,21 +708,6 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
   }
   static async #onShortRest() { this.actor.shortRest(); }
   static async #onLongRest()  { this.actor.longRest(); }
-  static async #onSpendSlot(event, target) {
-    const lv = target.dataset.level;
-    const key = lv === "pact" ? "pact" : `spell${lv}`;
-    const slot = this.actor.system.spells?.[key] ?? {};
-    if ((slot.value ?? 0) <= 0) return;
-    await this.actor.update({ [`system.spells.${key}.value`]: (slot.value ?? 0) - 1 });
-  }
-  static async #onRecoverSlot(event, target) {
-    const lv = target.dataset.level;
-    const key = lv === "pact" ? "pact" : `spell${lv}`;
-    const slot = this.actor.system.spells?.[key] ?? {};
-    const cur = slot.value ?? 0, max = slot.max ?? 0;
-    if (cur >= max) return;
-    await this.actor.update({ [`system.spells.${key}.value`]: cur + 1 });
-  }
   static async #onUseHitDie(event, target) {
     const cls = this.actor.items.get(target.dataset.classId);
     if (!cls) return;
@@ -780,6 +811,13 @@ export class StarworldCharacterSheet extends HandlebarsApplicationMixin(ActorShe
     const mgr = dnd5e.applications.advancement.AdvancementManager.forLevelChange(this.actor, cls.id, 1);
     if (mgr?.steps.length) mgr.render(true);
     else await cls.update({ "system.levels": (cls.system.levels ?? 1) + 1 });
+  }
+  static async #onDeleteClass(event, target) {
+    const editMode = this.actor.flags["starworld-sheet"]?.editMode ?? false;
+    if (!this.isEditable || !editMode) return;
+    const cls = this.actor.items.get(target.dataset.classId);
+    if (!cls || cls.type !== "class") return;
+    await cls.deleteDialog();
   }
   static async #onAddMulticlass(event, target) {
     // 从职业选择器添加新职业，不删除或重置已有职业。
