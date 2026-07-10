@@ -1901,6 +1901,16 @@ details.sw-multiclass-picker:not([open]) .sw-multiclass-list { display: none; }
   border-bottom: 1px solid var(--sw-border);
   margin-top: 4px;
 }
+.sw-inv-group-frame {
+  margin: 7px 0 13px;
+  padding: 22px 28px 21px;
+}
+.sw-inv-frame-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
 /* 物品行装备高亮 */
 .sw-item-row.equipped { background: rgba(74,222,128,0.05); border-left: 2px solid #4ade80; }
 .sw-item-qty { font-size: 0.65rem; color: var(--sw-muted); margin-right: auto; }

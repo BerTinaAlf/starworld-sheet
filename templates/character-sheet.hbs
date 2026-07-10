@@ -385,6 +385,16 @@
         {{!-- 分类列表 --}}
         {{#each invGroups as |grp|}}
         <div class="sw-inv-section-hd">{{grp.label}}</div>
+        <div class="sw-inv-group-frame sw-spell-frame">
+          <span class="sw-spell-frame-edge top" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge right" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge bottom" aria-hidden="true"></span>
+          <span class="sw-spell-frame-edge left" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner tl" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner tr" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner br" aria-hidden="true"></span>
+          <span class="sw-spell-frame-corner bl" aria-hidden="true"></span>
+          <div class="sw-spell-frame-body sw-inv-frame-body">
         {{#each grp.items as |g|}}
         <div class="sw-item-row{{#if g.equipped}} equipped{{/if}}" data-item-id="{{g.id}}">
           <img class="sw-item-img" src="{{g.img}}" alt="">
@@ -399,6 +409,8 @@
           {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete" title="删除">✕</button>{{/if}}
         </div>
         {{/each}}
+          </div>
+        </div>
         {{else}}
         <div class="sw-empty-hint">📦 暂无物品</div>
         {{/each}}
