@@ -50,15 +50,13 @@
         <span class="sw-qs-lbl">生命值</span>
         {{#if isDying}}
         <div class="sw-death">
-          <div class="sw-death-row">
-            <span class="sw-death-lbl success">✓</span>
+          <div class="sw-death-pips success">
             {{#each deathSuccesses as |v|}}<span class="sw-death-pip{{#if v}} on{{/if}}"></span>{{/each}}
           </div>
-          <div class="sw-death-row">
-            <span class="sw-death-lbl failure">✗</span>
+          <button type="button" class="sw-death-roll" data-action="rollDeath" title="骰死亡豁免">☠</button>
+          <div class="sw-death-pips failure">
             {{#each deathFailures as |v|}}<span class="sw-death-pip fail{{#if v}} on{{/if}}"></span>{{/each}}
           </div>
-          <button type="button" class="sw-death-roll" data-action="rollDeath">骰死亡豁免</button>
         </div>
         {{/if}}
       </div>
@@ -387,16 +385,6 @@
         {{!-- 分类列表 --}}
         {{#each invGroups as |grp|}}
         <div class="sw-inv-section-hd">{{grp.label}}</div>
-        <div class="sw-inv-group-frame sw-spell-frame">
-          <span class="sw-spell-frame-edge top" aria-hidden="true"></span>
-          <span class="sw-spell-frame-edge right" aria-hidden="true"></span>
-          <span class="sw-spell-frame-edge bottom" aria-hidden="true"></span>
-          <span class="sw-spell-frame-edge left" aria-hidden="true"></span>
-          <span class="sw-inv-frame-corner tl" aria-hidden="true"></span>
-          <span class="sw-inv-frame-corner tr" aria-hidden="true"></span>
-          <span class="sw-inv-frame-corner br" aria-hidden="true"></span>
-          <span class="sw-inv-frame-corner bl" aria-hidden="true"></span>
-          <div class="sw-spell-frame-body sw-inv-frame-body">
         {{#each grp.items as |g|}}
         <div class="sw-item-row{{#if g.equipped}} equipped{{/if}}" data-item-id="{{g.id}}">
           <img class="sw-item-img" src="{{g.img}}" alt="">
@@ -411,8 +399,6 @@
           {{#if @root.canEdit}}<button type="button" class="sw-btn-sm danger" data-action="itemAction" data-action-type="delete" title="删除">✕</button>{{/if}}
         </div>
         {{/each}}
-          </div>
-        </div>
         {{else}}
         <div class="sw-empty-hint">📦 暂无物品</div>
         {{/each}}

@@ -2,7 +2,7 @@
   "id": "starworld-sheet",
   "title": "星界旅者角色卡",
   "description": "为星界旅者工作室定制的高级角色卡界面，暗宇宙奢华风格",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "url": "https://github.com/BerTinaAlf/starworld-sheet",
   "manifest": "https://raw.githubusercontent.com/BerTinaAlf/starworld-sheet/main/module.json",
   "download": "https://github.com/BerTinaAlf/starworld-sheet/archive/refs/heads/main.zip",
